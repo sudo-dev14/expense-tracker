@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings -->
+    <string name="set_title">सेटिंग्स</string>
+    <string name="set_sms_denied">ऑटो-ट्रैकिंग के लिए Android सेटिंग्स में SMS पढ़ने की इजाज़त दें</string>
+    <string name="set_open">खोलें</string>
+    <string name="set_export_title">रिपोर्ट एक्सपोर्ट करें</string>
+    <string name="set_export_subtitle">किसी भी तारीख़ से तारीख़ तक की PDF</string>
+    <string name="set_rules_title">श्रेणियाँ और नियम</string>
+    <string name="set_rules_none">अभी तक कोई दुकान का नियम नहीं</string>
+    <plurals name="set_rules_count">
+        <item quantity="one">%d दुकान का नियम</item>
+        <item quantity="other">%d दुकानों के नियम</item>
+    </plurals>
+    <string name="set_auto_tracking">ऑटो-ट्रैकिंग</string>
+    <string name="set_auto_on">चालू · नए पेमेंट अपने-आप जुड़ जाते हैं</string>
+    <string name="set_auto_off">बंद · ख़र्च ख़ुद जोड़ें</string>
+    <string name="set_checking_messages">मैसेज देखे जा रहे हैं… अब तक %1$d मिले</string>
+    <string name="set_scan_again">सारे मैसेज फिर से देखें</string>
+    <string name="set_appearance">दिखावट</string>
+    <string name="set_language">भाषा</string>
+    <string name="set_delete_all">इस फ़ोन से सारा डेटा मिटाएँ</string>
+    <string name="set_delete_title">सब कुछ मिटाएँ?</string>
+    <string name="set_delete_text">सारे लेन-देन, श्रेणियाँ और सेटिंग्स इस फ़ोन से मिट जाएँगी। इसे वापस नहीं लाया जा सकेगा।</string>
+
+    <!-- Privacy center -->
+    <string name="set_privacy_center">प्राइवेसी सेंटर</string>
+    <string name="set_privacy_offline">ऑफ़लाइन चलता है</string>
+    <string name="set_privacy_always">हमेशा</string>
+    <string name="set_privacy_auto_tracking">ऑटो-ट्रैकिंग</string>
+    <string name="set_privacy_on">चालू</string>
+    <string name="set_privacy_off">बंद</string>
+    <string name="set_privacy_backup">क्लाउड बैकअप</string>
+    <string name="set_privacy_stored">डेटा कहाँ है</string>
+    <string name="set_privacy_this_phone">सिर्फ़ इसी फ़ोन में</string>
+    <string name="set_privacy_no_internet">इस ऐप को इंटरनेट की इजाज़त ही नहीं है, इसलिए Android इसे ऑनलाइन जाने नहीं देता।</string>
+    <string name="set_privacy_how_to">ख़ुद कैसे जाँचें</string>
+
+    <!-- Merchant rules -->
+    <string name="rules_title">श्रेणियाँ और नियम</string>
+    <string name="rules_explainer">किसी लेन-देन को बदलते समय जब आप “… को हमेशा … में रखें” चुनते हैं, तो वह नियम यहाँ दिखता है। उस दुकान को होने वाले नए पेमेंट अपने-आप उसी श्रेणी में चले जाते हैं।</string>
+    <string name="rules_empty">अभी कोई नियम नहीं है।</string>
+    <string name="rules_remove">%1$s का नियम हटाएँ</string>
+
+    <!-- Export screen -->
+    <string name="export_title">रिपोर्ट एक्सपोर्ट करें</string>
+    <string name="export_date_span">%1$s – %2$s</string>
+    <plurals name="export_txn_count">
+        <item quantity="one">%d लेन-देन</item>
+        <item quantity="other">%d लेन-देन</item>
+    </plurals>
+    <plurals name="export_pages">
+        <item quantity="one">लगभग %d पेज</item>
+        <item quantity="other">लगभग %d पेज</item>
+    </plurals>
+    <string name="export_count_and_pages">%1$s · %2$s</string>
+    <string name="export_date_range">तारीख़</string>
+    <string name="export_include">क्या-क्या शामिल करें</string>
+    <string name="export_opt_summary">सारांश और कुल रकम</string>
+    <string name="export_opt_chart">श्रेणी वाला चार्ट</string>
+    <string name="export_opt_list">लेन-देन की लिस्ट</string>
+    <string name="export_opt_income">आमदनी</string>
+    <string name="export_privacy_note">PDF इसी फ़ोन पर बनती है। शेयर करने पर फ़ाइल सिर्फ़ उसी ऐप को जाती है जिसे आप चुनते हैं।</string>
+    <string name="export_save">फ़ोन में सेव करें</string>
+    <string name="export_share">शेयर करें…</string>
+    <string name="export_share_chooser">रिपोर्ट शेयर करें</string>
+    <string name="export_saved">रिपोर्ट सेव हो गई</string>
+    <string name="export_save_failed">रिपोर्ट सेव नहीं हो पाई</string>
+
+    <!-- PDF report -->
+    <string name="pdf_title">खर्चा · ख़र्च की रिपोर्ट</string>
+    <string name="pdf_date_span">%1$s – %2$s</string>
+    <string name="pdf_generated">%1$s को बनाई गई</string>
+    <string name="pdf_footer">इस फ़ोन पर खर्चा से बनाई गई · पेज %1$d</string>
+    <string name="pdf_spent">ख़र्च</string>
+    <string name="pdf_income">आमदनी</string>
+    <string name="pdf_net">बाक़ी</string>
+    <string name="pdf_transactions">लेन-देन</string>
+    <string name="pdf_by_category">श्रेणी के हिसाब से ख़र्च</string>
+    <string name="pdf_percent">%1$d%%</string>
+    <string name="pdf_col_date">तारीख़</string>
+    <string name="pdf_col_payee">किसे दिया / किससे मिला</string>
+    <string name="pdf_col_category">श्रेणी</string>
+    <string name="pdf_col_amount">रकम</string>
+</resources>

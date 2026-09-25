@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -53,10 +54,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.accountLabel
 import com.expensetracker.app.data.categoryEnum
-import com.expensetracker.app.data.displayMerchant
+import com.expensetracker.app.ui.displayName
+import com.expensetracker.app.ui.merchantName
 import com.expensetracker.core.analytics.Bucket
 import com.expensetracker.core.analytics.DateRange
 import com.expensetracker.core.analytics.RangePreset
@@ -82,6 +85,7 @@ fun Category.textColor(): Color = if (isDark()) lerp(color, Color.White, 0.5f) e
 /** The lock + "Offline" pill shown in every top bar. */
 @Composable
 fun OfflineBadge(onClick: (() -> Unit)? = null) {
+    val badgeDescription = stringResource(R.string.comp_offline_badge_cd)
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.primaryContainer,
@@ -89,7 +93,7 @@ fun OfflineBadge(onClick: (() -> Unit)? = null) {
         modifier = Modifier
             .height(32.dp)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .semantics { contentDescription = "Offline. Your data stays on this phone." },
+            .semantics { contentDescription = badgeDescription },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -97,7 +101,7 @@ fun OfflineBadge(onClick: (() -> Unit)? = null) {
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
-            Text("Offline", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.comp_offline), fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -151,8 +155,8 @@ fun RangeChips(
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = contentPadding) {
         items(RangePreset.entries) { preset ->
             val label = if (preset == RangePreset.CUSTOM && selected == RangePreset.CUSTOM && customRange != null) {
-                "${customRange.start.format(SHORT_DATE)} – ${customRange.endInclusive.format(SHORT_DATE)}"
-            } else preset.label
+                stringResource(R.string.comp_custom_range, customRange.start.format(SHORT_DATE), customRange.endInclusive.format(SHORT_DATE))
+            } else preset.displayName()
             FilterChip(
                 selected = preset == selected,
                 onClick = { if (preset == RangePreset.CUSTOM) showPicker = true else onSelect(preset) },
@@ -181,9 +185,9 @@ fun RangeChips(
                         onCustomRange(DateRange(start, maxOf(start, end)))
                         showPicker = false
                     },
-                ) { Text("Apply") }
+                ) { Text(stringResource(R.string.comp_apply)) }
             },
-            dismissButton = { TextButton(onClick = { showPicker = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showPicker = false }) { Text(stringResource(R.string.action_cancel)) } },
         ) {
             DateRangePicker(state = state, modifier = Modifier.weight(1f))
         }
@@ -221,11 +225,15 @@ fun TransactionRow(tx: TransactionEntity, onClick: () -> Unit, modifier: Modifie
             .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 10.dp),
     ) {
-        MerchantAvatar(tx.displayMerchant, tx.categoryEnum)
+        MerchantAvatar(tx.merchantName(), tx.categoryEnum)
         Column(Modifier.weight(1f)) {
-            Text(tx.displayMerchant, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(tx.merchantName(), fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
-                listOfNotNull(tx.categoryEnum.label, tx.accountLabel, tx.channel.label.takeIf { tx.channel.name != "OTHER" })
+                listOfNotNull(
+                    tx.categoryEnum.displayName(),
+                    tx.accountLabel,
+                    if (tx.channel.name != "OTHER") tx.channel.displayName() else null,
+                )
                     .joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -293,10 +301,12 @@ fun VerticalSpace(height: Dp) = Spacer(Modifier.height(height))
 @Composable
 fun HorizontalSpace(width: Dp) = Spacer(Modifier.width(width))
 
-val SHORT_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM", Locale.ENGLISH)
-val FULL_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
-val DATE_TIME: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.ENGLISH)
-val DAY_HEADER: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.ENGLISH)
+// Getters, not cached values: the app language can change while the process is running.
+// Month and day names follow the app language; digits stay Latin (DateTimeFormatter's default).
+val SHORT_DATE: DateTimeFormatter get() = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
+val FULL_DATE: DateTimeFormatter get() = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.getDefault())
+val DATE_TIME: DateTimeFormatter get() = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.getDefault())
+val DAY_HEADER: DateTimeFormatter get() = DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())
 
 fun Long.toLocalDate(zone: ZoneId = ZoneId.systemDefault()): LocalDate = Instant.ofEpochMilli(this).atZone(zone).toLocalDate()
 

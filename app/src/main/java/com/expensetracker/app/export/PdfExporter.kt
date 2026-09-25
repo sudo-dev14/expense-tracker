@@ -10,10 +10,12 @@ import android.graphics.pdf.PdfDocument
 import android.text.TextUtils
 import android.text.TextPaint
 import androidx.core.content.FileProvider
+import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.categoryEnum
-import com.expensetracker.app.data.displayMerchant
 import com.expensetracker.app.data.toPoint
+import com.expensetracker.app.ui.displayName
+import com.expensetracker.app.ui.merchantName
 import com.expensetracker.core.analytics.Analytics
 import com.expensetracker.core.analytics.DateRange
 import com.expensetracker.core.format.Money
@@ -36,15 +38,19 @@ data class ExportOptions(
 /**
  * Builds the report with Android's built-in [PdfDocument]: no library, no network.
  * The file only leaves the phone if the user explicitly shares it.
+ *
+ * [context] is the Application context (cache dir, FileProvider). Text in the PDF comes from the
+ * `localized` context passed to [write]/[writeForSharing] (the Activity), because below Android 13
+ * the Application context doesn't carry the in-app language.
  */
 class PdfExporter(private val context: Context) {
 
     private val zone: ZoneId get() = ZoneId.systemDefault()
 
-    fun write(out: OutputStream, range: DateRange, all: List<TransactionEntity>, options: ExportOptions) {
+    fun write(localized: Context, out: OutputStream, range: DateRange, all: List<TransactionEntity>, options: ExportOptions) {
         val txns = if (options.includeIncome) all else all.filter { it.type == TransactionType.DEBIT }
         val doc = PdfDocument()
-        val writer = PageWriter(doc)
+        val writer = PageWriter(doc, localized)
         writer.header(range)
         if (options.summary) writer.summary(all, options.includeIncome)
         if (options.categoryChart) writer.categories(all)
@@ -55,11 +61,11 @@ class PdfExporter(private val context: Context) {
     }
 
     /** Writes the report into the app cache and returns a shareable content:// URI. */
-    fun writeForSharing(range: DateRange, txns: List<TransactionEntity>, options: ExportOptions): android.net.Uri {
+    fun writeForSharing(localized: Context, range: DateRange, txns: List<TransactionEntity>, options: ExportOptions): android.net.Uri {
         val dir = File(context.cacheDir, "exports").apply { mkdirs() }
         dir.listFiles()?.forEach { it.delete() } // keep only the latest export
         val file = File(dir, fileName(range))
-        file.outputStream().use { write(it, range, txns, options) }
+        file.outputStream().use { write(localized, it, range, txns, options) }
         return FileProvider.getUriForFile(context, "${context.packageName}.files", file)
     }
 
@@ -76,7 +82,11 @@ class PdfExporter(private val context: Context) {
         return 1 + (txnCount - onFirst + ROWS_PER_PAGE - 1) / ROWS_PER_PAGE
     }
 
-    private inner class PageWriter(private val doc: PdfDocument) {
+    private inner class PageWriter(private val doc: PdfDocument, private val res: Context) {
+        private val locale: Locale = res.resources.configuration.locales[0]
+        private val longDate: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+        private val rowDate: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yy", locale)
+
         private var pageNumber = 0
         private lateinit var page: PdfDocument.Page
         private lateinit var canvas: Canvas
@@ -110,7 +120,7 @@ class PdfExporter(private val context: Context) {
         }
 
         private fun finishPage() {
-            canvas.drawText("Created on this phone with Kharcha · Page $pageNumber", MARGIN, PAGE_H - 24f, small)
+            canvas.drawText(res.getString(R.string.pdf_footer, pageNumber), MARGIN, PAGE_H - 24f, small)
             doc.finishPage(page)
         }
 
@@ -122,14 +132,14 @@ class PdfExporter(private val context: Context) {
 
         fun header(range: DateRange) {
             y += 22f
-            canvas.drawText("Kharcha · Expense report", MARGIN, y, title)
+            canvas.drawText(res.getString(R.string.pdf_title), MARGIN, y, title)
             y += 18f
             canvas.drawText(
-                "${range.start.format(LONG_DATE)} – ${range.endInclusive.format(LONG_DATE)}",
+                res.getString(R.string.pdf_date_span, range.start.format(longDate), range.endInclusive.format(longDate)),
                 MARGIN, y, body.apply { color = muted },
             )
             body.color = ink
-            val generated = "Generated ${LocalDate.now(zone).format(LONG_DATE)}"
+            val generated = res.getString(R.string.pdf_generated, LocalDate.now(zone).format(longDate))
             canvas.drawText(generated, PAGE_W - MARGIN - small.measureText(generated), y, small)
             y += 14f
             canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, rule)
@@ -139,12 +149,12 @@ class PdfExporter(private val context: Context) {
         fun summary(txns: List<TransactionEntity>, includeIncome: Boolean) {
             val s = Analytics.summary(txns.map { it.toPoint() })
             val cells = buildList {
-                add("Spent" to Money.format(s.spentMinor))
+                add(res.getString(R.string.pdf_spent) to Money.format(s.spentMinor))
                 if (includeIncome) {
-                    add("Income" to Money.format(s.incomeMinor))
-                    add("Net" to Money.format(s.netMinor, signed = true))
+                    add(res.getString(R.string.pdf_income) to Money.format(s.incomeMinor))
+                    add(res.getString(R.string.pdf_net) to Money.format(s.netMinor, signed = true))
                 }
-                add("Transactions" to s.count.toString())
+                add(res.getString(R.string.pdf_transactions) to s.count.toString())
             }
             ensureSpace(60f)
             val w = (PAGE_W - 2 * MARGIN) / cells.size
@@ -160,7 +170,7 @@ class PdfExporter(private val context: Context) {
             val cats = Analytics.byCategory(txns.map { it.toPoint() })
             if (cats.isEmpty()) return
             ensureSpace(170f)
-            canvas.drawText("Spending by category", MARGIN, y, h2)
+            canvas.drawText(res.getString(R.string.pdf_by_category), MARGIN, y, h2)
             y += 14f
             val size = 120f
             val oval = RectF(MARGIN + 8, y + 6, MARGIN + 8 + size, y + 6 + size)
@@ -178,8 +188,8 @@ class PdfExporter(private val context: Context) {
             cats.take(10).forEach { c ->
                 swatch.color = c.category.colorArgb.toInt()
                 canvas.drawRoundRect(RectF(lx, ly - 8, lx + 9, ly + 1), 2f, 2f, swatch)
-                canvas.drawText(c.category.label, lx + 16, ly, body)
-                val pct = "${(c.share * 100).toInt()}%"
+                canvas.drawText(c.category.displayName(res), lx + 16, ly, body)
+                val pct = res.getString(R.string.pdf_percent, (c.share * 100).toInt())
                 val amt = Money.format(c.amountMinor)
                 canvas.drawText(pct, PAGE_W - MARGIN - 110f, ly, small)
                 canvas.drawText(amt, PAGE_W - MARGIN - bodyBold.measureText(amt), ly, bodyBold)
@@ -191,7 +201,7 @@ class PdfExporter(private val context: Context) {
         fun table(txns: List<TransactionEntity>) {
             if (txns.isEmpty()) return
             ensureSpace(60f)
-            canvas.drawText("Transactions", MARGIN, y, h2)
+            canvas.drawText(res.getString(R.string.pdf_transactions), MARGIN, y, h2)
             y += 18f
             columnHeaders()
             txns.forEach { tx ->
@@ -199,12 +209,12 @@ class PdfExporter(private val context: Context) {
                     newPage()
                     columnHeaders()
                 }
-                val date = Instant.ofEpochMilli(tx.timestamp).atZone(zone).toLocalDate().format(ROW_DATE)
+                val date = Instant.ofEpochMilli(tx.timestamp).atZone(zone).toLocalDate().format(rowDate)
                 val credit = tx.type == TransactionType.CREDIT
                 val amount = Money.format(if (credit) tx.amountMinor else -tx.amountMinor, showPaise = true, signed = true)
                 canvas.drawText(date, COL_DATE, y, body)
-                canvas.drawText(ellipsize(tx.displayMerchant, 190f), COL_PAYEE, y, body)
-                canvas.drawText(ellipsize(tx.categoryEnum.label, 110f), COL_CATEGORY, y, small)
+                canvas.drawText(ellipsize(tx.merchantName(res), 190f), COL_PAYEE, y, body)
+                canvas.drawText(ellipsize(tx.categoryEnum.displayName(res), 110f), COL_CATEGORY, y, small)
                 bodyBold.color = if (credit) accent else ink
                 canvas.drawText(amount, PAGE_W - MARGIN - bodyBold.measureText(amount), y, bodyBold)
                 bodyBold.color = ink
@@ -215,10 +225,11 @@ class PdfExporter(private val context: Context) {
         }
 
         private fun columnHeaders() {
-            canvas.drawText("DATE", COL_DATE, y, small)
-            canvas.drawText("PAID TO / FROM", COL_PAYEE, y, small)
-            canvas.drawText("CATEGORY", COL_CATEGORY, y, small)
-            canvas.drawText("AMOUNT", PAGE_W - MARGIN - small.measureText("AMOUNT"), y, small)
+            val amountHeader = res.getString(R.string.pdf_col_amount)
+            canvas.drawText(res.getString(R.string.pdf_col_date), COL_DATE, y, small)
+            canvas.drawText(res.getString(R.string.pdf_col_payee), COL_PAYEE, y, small)
+            canvas.drawText(res.getString(R.string.pdf_col_category), COL_CATEGORY, y, small)
+            canvas.drawText(amountHeader, PAGE_W - MARGIN - small.measureText(amountHeader), y, small)
             y += 6f
             canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, rule)
             y += ROW_H - 4f
@@ -237,8 +248,7 @@ class PdfExporter(private val context: Context) {
         const val COL_DATE = MARGIN
         const val COL_PAYEE = MARGIN + 70f
         const val COL_CATEGORY = MARGIN + 280f
-        val LONG_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
-        val ROW_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yy", Locale.ENGLISH)
+        // File names stay ASCII whatever the app language.
         val FILE_DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH)
     }
 }

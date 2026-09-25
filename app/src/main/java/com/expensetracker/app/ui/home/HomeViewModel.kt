@@ -1,8 +1,10 @@
 package com.expensetracker.app.ui.home
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.toPoint
 import com.expensetracker.core.analytics.Analytics
@@ -10,6 +12,7 @@ import com.expensetracker.core.analytics.Bucket
 import com.expensetracker.core.analytics.CategoryTotal
 import com.expensetracker.core.analytics.DateRange
 import com.expensetracker.core.analytics.DateRanges
+import com.expensetracker.core.analytics.Granularity
 import com.expensetracker.core.analytics.MerchantTotal
 import com.expensetracker.core.analytics.RangePreset
 import com.expensetracker.core.analytics.Summary
@@ -31,9 +34,12 @@ data class HomeUiState(
     val range: DateRange? = null,
     val summary: Summary = Summary(0, 0, 0),
     val changePercent: Int? = null,
-    val comparisonLabel: String = "",
+    /** "vs last month" etc. Resolved to text in the UI so it follows the app language. */
+    @StringRes val comparisonLabelRes: Int = R.string.home_vs_last_month,
     val categories: List<CategoryTotal> = emptyList(),
     val buckets: List<Bucket> = emptyList(),
+    /** How [buckets] are grouped, so the UI can format bucket dates itself. */
+    val bucketGranularity: Granularity = Granularity.DAY,
     val merchants: List<MerchantTotal> = emptyList(),
     val recent: List<TransactionEntity> = emptyList(),
     val reviewCount: Int = 0,
@@ -50,6 +56,14 @@ fun AppContainer.selectedRange() = combine(
     val zone = ZoneId.systemDefault()
     val earliestDate = earliest?.let { java.time.Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
     Triple(preset, custom, DateRanges.resolve(preset, LocalDate.now(zone), custom, earliestDate))
+}
+
+/** Same cases as core `DateRanges.comparisonLabel`, as string resources. */
+@StringRes
+private fun comparisonLabelRes(preset: RangePreset): Int = when (preset) {
+    RangePreset.THIS_MONTH -> R.string.home_vs_last_month
+    RangePreset.LAST_YEAR -> R.string.home_vs_previous_year
+    else -> R.string.home_vs_previous_period
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,9 +90,10 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
                     summary = summary,
                     // "All time" has nothing before it to compare with.
                     changePercent = if (preset == RangePreset.ALL_TIME) null else Analytics.percentChange(summary.spentMinor, priorSpent),
-                    comparisonLabel = DateRanges.comparisonLabel(preset),
+                    comparisonLabelRes = comparisonLabelRes(preset),
                     categories = Analytics.byCategory(points),
                     buckets = Analytics.buckets(points, range, zone),
+                    bucketGranularity = Analytics.granularityFor(range),
                     merchants = Analytics.topMerchants(points, 3),
                     recent = current.take(5),
                     reviewCount = reviewCount,

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom navigation tabs -->
+    <string name="nav_home">Home</string>
+    <string name="nav_transactions">Transactions</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Onboarding: shared -->
+    <string name="onb_step_of">%1$d of %2$d</string>
+    <string name="onb_continue">Continue</string>
+
+    <!-- Onboarding step 1: privacy promise -->
+    <string name="onb_privacy_title">Your messages stay on your phone.</string>
+    <string name="onb_privacy_body">Everything is read, stored and calculated on this device. Nothing is ever uploaded.</string>
+    <string name="onb_promise_internet_title">No internet permission</string>
+    <string name="onb_promise_internet_body">Android itself blocks this app from going online, so nothing can be sent anywhere.</string>
+    <string name="onb_promise_account_title">No account, no login</string>
+    <string name="onb_promise_account_body">No email, no phone number, no sign-up.</string>
+    <string name="onb_promise_ads_title">No ads, trackers or analytics</string>
+    <string name="onb_promise_ads_body">We never see how you use the app.</string>
+    <string name="onb_how_to_check">How to check this yourself</string>
+
+    <!-- "Check it yourself" dialog -->
+    <string name="onb_verify_title">Check it yourself</string>
+    <string name="onb_verify_body">Open your phone\'s Settings › Apps › Kharcha › Permissions (or \"App info\").\n\nYou\'ll see there is no network or internet access listed. Android enforces this, so the app physically cannot send your data anywhere.\n\nYou can also turn on Airplane mode: everything keeps working.</string>
+    <string name="onb_verify_got_it">Got it</string>
+
+    <!-- Onboarding step 2: auto-tracking -->
+    <string name="onb_auto_turn_on">Turn on auto-tracking</string>
+    <string name="onb_auto_skip">Skip — I\'ll add expenses manually</string>
+    <string name="onb_auto_title">Track spending automatically</string>
+    <string name="onb_auto_body">The app picks up your payment messages and builds your expense history for you. No typing, no effort.</string>
+    <string name="onb_quality_offline_title">Works 100% offline</string>
+    <string name="onb_quality_offline_body">No internet needed. The app has no network access at all.</string>
+    <string name="onb_quality_local_title">Stays on your phone</string>
+    <string name="onb_quality_local_body">Everything is processed and stored right here.</string>
+    <string name="onb_quality_spending_title">Only your spending</string>
+    <string name="onb_quality_spending_body">Picks up payments. Everything else is left alone.</string>
+    <string name="onb_auto_switch_off_hint">You can switch auto-tracking off any time in Settings.</string>
+
+    <!-- Onboarding step 3: import progress -->
+    <string name="onb_import_see_spending">See my spending</string>
+    <string name="onb_import_continue_background">Continue — finish in background</string>
+    <string name="onb_import_done_title">All set!</string>
+    <string name="onb_import_running_title">Finding your transactions…</string>
+    <string name="onb_import_offline_note">All on this phone, fully offline.</string>
+    <string name="onb_import_percent">%1$d%%</string>
+    <string name="onb_import_date_range">%1$s → today</string>
+    <plurals name="onb_import_messages_checked">
+        <item quantity="one">message checked</item>
+        <item quantity="other">messages checked</item>
+    </plurals>
+    <plurals name="onb_import_transactions_found">
+        <item quantity="one">transaction found</item>
+        <item quantity="other">transactions found</item>
+    </plurals>
+    <string name="onb_import_just_found">Just found</string>
+</resources>

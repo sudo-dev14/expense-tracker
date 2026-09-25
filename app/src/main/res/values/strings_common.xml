@@ -39,6 +39,10 @@
     <string name="lang_english" translatable="false">English</string>
     <string name="lang_hindi" translatable="false">हिन्दी</string>
 
+    <!-- Shown when a transaction has no payee name. -->
+    <string name="merchant_money_received">Money received</string>
+    <string name="merchant_payment">Payment</string>
+
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
     <string name="action_save">Save</string>

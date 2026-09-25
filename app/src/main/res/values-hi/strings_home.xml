@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">ख़र्च</string>
+    <string name="home_recent">हाल के लेन-देन</string>
+    <string name="home_see_all">सभी देखें</string>
+    <string name="home_add_expense">ख़र्च जोड़ें</string>
+
+    <string name="home_spent_in_month">%1$s में ख़र्च</string>
+    <string name="home_spent_this_month">इस महीने ख़र्च</string>
+    <string name="home_spent_total">कुल ख़र्च</string>
+    <string name="home_spent">ख़र्च</string>
+
+    <string name="home_vs_last_month">पिछले महीने से</string>
+    <string name="home_vs_previous_year">पिछले साल से</string>
+    <string name="home_vs_previous_period">पिछली अवधि से</string>
+    <string name="home_change_percent">%2$s %1$d%%</string>
+    <string name="home_change_up_cd">%2$s %1$d प्रतिशत ज़्यादा</string>
+    <string name="home_change_down_cd">%2$s %1$d प्रतिशत कम</string>
+
+    <string name="home_income">आमदनी</string>
+    <string name="home_net_saved">बचत</string>
+    <string name="home_net_overspent">ज़्यादा ख़र्च</string>
+
+    <plurals name="home_review_banner">
+        <item quantity="one">लेन-देन को एक बार जाँच लें</item>
+        <item quantity="other">लेन-देन को एक बार जाँच लें</item>
+    </plurals>
+
+    <string name="home_autotrack_off_title">ऑटो-ट्रैकिंग बंद है</string>
+    <string name="home_autotrack_off_body">इसे सेटिंग्स में चालू करें, ताकि ख़र्च अपने-आप भर जाएँ — फिर भी पूरी तरह ऑफ़लाइन।</string>
+
+    <string name="home_empty_title">इस समय में कोई लेन-देन नहीं</string>
+    <string name="home_empty_body">ऊपर से लंबा समय चुनें, या ख़ुद ख़र्च जोड़ें।</string>
+    <string name="home_add_manually">ख़ुद जोड़ें</string>
+
+    <string name="home_by_category">कैटेगरी के हिसाब से</string>
+    <string name="home_category_share_cd">%1$s %2$d प्रतिशत</string>
+
+    <string name="home_trend_title">समय के साथ ख़र्च</string>
+    <string name="home_peak">सबसे ज़्यादा %1$s · %2$s</string>
+
+    <string name="home_top_merchants">सबसे ज़्यादा ख़र्च यहाँ</string>
+    <plurals name="home_payments">
+        <item quantity="one">%d पेमेंट</item>
+        <item quantity="other">%d पेमेंट</item>
+    </plurals>
+
+    <string name="comp_offline">ऑफ़लाइन</string>
+    <string name="comp_offline_badge_cd">ऑफ़लाइन। आपका डेटा इसी फ़ोन में रहता है।</string>
+    <string name="comp_apply">लागू करें</string>
+    <string name="comp_custom_range">%1$s – %2$s</string>
+</resources>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings, privacy center, merchant rules, export screen and the PDF report. -->
+<resources>
+    <!-- Settings -->
+    <string name="set_title">Settings</string>
+    <string name="set_sms_denied">Allow SMS access in Android settings to use auto-tracking</string>
+    <string name="set_open">Open</string>
+    <string name="set_export_title">Export report</string>
+    <string name="set_export_subtitle">PDF of any date range</string>
+    <string name="set_rules_title">Categories &amp; rules</string>
+    <string name="set_rules_none">No merchant rules yet</string>
+    <plurals name="set_rules_count">
+        <item quantity="one">%d merchant rule</item>
+        <item quantity="other">%d merchant rules</item>
+    </plurals>
+    <string name="set_auto_tracking">Auto-tracking</string>
+    <string name="set_auto_on">On · new payments are added automatically</string>
+    <string name="set_auto_off">Off · add expenses manually</string>
+    <string name="set_checking_messages">Checking messages… %1$d found so far</string>
+    <string name="set_scan_again">Scan all messages again</string>
+    <string name="set_appearance">Appearance</string>
+    <string name="set_language">Language</string>
+    <string name="set_delete_all">Delete all data from this phone</string>
+    <string name="set_delete_title">Delete everything?</string>
+    <string name="set_delete_text">All transactions, categories and settings will be erased from this phone. This can\'t be undone.</string>
+
+    <!-- Privacy center -->
+    <string name="set_privacy_center">Privacy center</string>
+    <string name="set_privacy_offline">Works offline</string>
+    <string name="set_privacy_always">Always</string>
+    <string name="set_privacy_auto_tracking">Auto-tracking</string>
+    <string name="set_privacy_on">On</string>
+    <string name="set_privacy_off">Off</string>
+    <string name="set_privacy_backup">Cloud backup</string>
+    <string name="set_privacy_stored">Data stored</string>
+    <string name="set_privacy_this_phone">This phone only</string>
+    <string name="set_privacy_no_internet">This app has no internet permission, so Android blocks it from going online.</string>
+    <string name="set_privacy_how_to">How to check this yourself</string>
+
+    <!-- Merchant rules -->
+    <string name="rules_title">Categories &amp; rules</string>
+    <string name="rules_explainer">When you choose “Always put … in …” while editing a transaction, it shows up here. New payments to that merchant get the same category automatically.</string>
+    <string name="rules_empty">No rules yet.</string>
+    <string name="rules_remove">Remove rule for %1$s</string>
+
+    <!-- Export screen -->
+    <string name="export_title">Export report</string>
+    <string name="export_date_span">%1$s – %2$s</string>
+    <plurals name="export_txn_count">
+        <item quantity="one">%d transaction</item>
+        <item quantity="other">%d transactions</item>
+    </plurals>
+    <plurals name="export_pages">
+        <item quantity="one">about %d page</item>
+        <item quantity="other">about %d pages</item>
+    </plurals>
+    <!-- %1$s = number of transactions, %2$s = estimated pages -->
+    <string name="export_count_and_pages">%1$s · %2$s</string>
+    <string name="export_date_range">Date range</string>
+    <string name="export_include">Include</string>
+    <string name="export_opt_summary">Summary &amp; totals</string>
+    <string name="export_opt_chart">Category chart</string>
+    <string name="export_opt_list">Transaction list</string>
+    <string name="export_opt_income">Income</string>
+    <string name="export_privacy_note">The PDF is created on this phone. Sharing it sends the file to whichever app you pick.</string>
+    <string name="export_save">Save to phone</string>
+    <string name="export_share">Share…</string>
+    <string name="export_share_chooser">Share report</string>
+    <string name="export_saved">Report saved</string>
+    <string name="export_save_failed">Couldn\'t save the report</string>
+
+    <!-- PDF report -->
+    <string name="pdf_title">Kharcha · Expense report</string>
+    <string name="pdf_date_span">%1$s – %2$s</string>
+    <string name="pdf_generated">Generated %1$s</string>
+    <string name="pdf_footer">Created on this phone with Kharcha · Page %1$d</string>
+    <string name="pdf_spent">Spent</string>
+    <string name="pdf_income">Income</string>
+    <string name="pdf_net">Net</string>
+    <string name="pdf_transactions">Transactions</string>
+    <string name="pdf_by_category">Spending by category</string>
+    <string name="pdf_percent">%1$d%%</string>
+    <string name="pdf_col_date">DATE</string>
+    <string name="pdf_col_payee">PAID TO / FROM</string>
+    <string name="pdf_col_category">CATEGORY</string>
+    <string name="pdf_col_amount">AMOUNT</string>
+</resources>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bottom navigation tabs -->
+    <string name="nav_home">होम</string>
+    <string name="nav_transactions">लेन-देन</string>
+    <string name="nav_settings">सेटिंग्स</string>
+
+    <!-- Onboarding: shared -->
+    <string name="onb_step_of">%2$d में से %1$d</string>
+    <string name="onb_continue">जारी रखें</string>
+
+    <!-- Onboarding step 1: privacy promise -->
+    <string name="onb_privacy_title">आपके मैसेज आपके फ़ोन में ही रहते हैं।</string>
+    <string name="onb_privacy_body">सब कुछ इसी फ़ोन पर पढ़ा, सेव और हिसाब किया जाता है। कुछ भी कहीं अपलोड नहीं होता।</string>
+    <string name="onb_promise_internet_title">इंटरनेट की अनुमति नहीं</string>
+    <string name="onb_promise_internet_body">Android ख़ुद इस ऐप को ऑनलाइन जाने से रोकता है, इसलिए कुछ भी कहीं भेजा नहीं जा सकता।</string>
+    <string name="onb_promise_account_title">न अकाउंट, न लॉग-इन</string>
+    <string name="onb_promise_account_body">न ईमेल, न फ़ोन नंबर, न साइन-अप।</string>
+    <string name="onb_promise_ads_title">न विज्ञापन, न ट्रैकर, न एनालिटिक्स</string>
+    <string name="onb_promise_ads_body">आप ऐप कैसे इस्तेमाल करते हैं, यह हम कभी नहीं देखते।</string>
+    <string name="onb_how_to_check">ख़ुद कैसे जाँचें</string>
+
+    <!-- "Check it yourself" dialog -->
+    <string name="onb_verify_title">ख़ुद जाँच लें</string>
+    <string name="onb_verify_body">अपने फ़ोन में सेटिंग्स › ऐप्स › खर्चा › अनुमतियाँ (या \"ऐप की जानकारी\") खोलें।\n\nवहाँ आपको नेटवर्क या इंटरनेट की कोई अनुमति नहीं दिखेगी। यह Android ख़ुद तय करता है, इसलिए यह ऐप आपका डेटा कहीं भेज ही नहीं सकता।\n\nआप चाहें तो एयरप्लेन मोड भी चालू कर सकते हैं: सब कुछ पहले की तरह चलता रहेगा।</string>
+    <string name="onb_verify_got_it">ठीक है</string>
+
+    <!-- Onboarding step 2: auto-tracking -->
+    <string name="onb_auto_turn_on">ऑटो-ट्रैकिंग चालू करें</string>
+    <string name="onb_auto_skip">छोड़ें — ख़र्च ख़ुद जोड़ेंगे</string>
+    <string name="onb_auto_title">ख़र्च अपने-आप ट्रैक करें</string>
+    <string name="onb_auto_body">ऐप आपके पेमेंट मैसेज पढ़कर आपके ख़र्च का हिसाब ख़ुद बना देता है। न कुछ टाइप करना, न कोई झंझट।</string>
+    <string name="onb_quality_offline_title">100% ऑफ़लाइन चलता है</string>
+    <string name="onb_quality_offline_body">इंटरनेट की ज़रूरत नहीं। ऐप के पास नेटवर्क की कोई अनुमति ही नहीं है।</string>
+    <string name="onb_quality_local_title">आपके फ़ोन में ही रहता है</string>
+    <string name="onb_quality_local_body">सब कुछ यहीं फ़ोन पर प्रोसेस और सेव होता है।</string>
+    <string name="onb_quality_spending_title">सिर्फ़ आपका ख़र्च</string>
+    <string name="onb_quality_spending_body">सिर्फ़ पेमेंट पढ़ता है। बाक़ी मैसेज को छूता भी नहीं।</string>
+    <string name="onb_auto_switch_off_hint">आप सेटिंग्स में जाकर कभी भी ऑटो-ट्रैकिंग बंद कर सकते हैं।</string>
+
+    <!-- Onboarding step 3: import progress -->
+    <string name="onb_import_see_spending">मेरा ख़र्च देखें</string>
+    <string name="onb_import_continue_background">जारी रखें — बाक़ी काम पीछे चलेगा</string>
+    <string name="onb_import_done_title">सब तैयार है!</string>
+    <string name="onb_import_running_title">आपके लेन-देन ढूँढ रहे हैं…</string>
+    <string name="onb_import_offline_note">सब कुछ इसी फ़ोन पर, पूरी तरह ऑफ़लाइन।</string>
+    <string name="onb_import_percent">%1$d%%</string>
+    <string name="onb_import_date_range">%1$s → आज</string>
+    <plurals name="onb_import_messages_checked">
+        <item quantity="one">मैसेज देखा गया</item>
+        <item quantity="other">मैसेज देखे गए</item>
+    </plurals>
+    <plurals name="onb_import_transactions_found">
+        <item quantity="one">लेन-देन मिला</item>
+        <item quantity="other">लेन-देन मिले</item>
+    </plurals>
+    <string name="onb_import_just_found">अभी मिले</string>
+</resources>

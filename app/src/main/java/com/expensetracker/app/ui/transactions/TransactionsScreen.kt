@@ -39,6 +39,7 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,13 +47,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.ui.components.DAY_HEADER
+import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.RangeChips
 import com.expensetracker.app.ui.components.ScreenHeader
 import com.expensetracker.app.ui.components.SectionLabel
@@ -73,27 +77,33 @@ fun TransactionsScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val markedMessage = stringResource(R.string.txn_marked_not_expense)
+    val undoLabel = stringResource(R.string.action_undo)
+
+    // Let search match category names in the app language as well as English.
+    val categoryNames = Category.entries.associateWith { it.displayName() }
+    LaunchedEffect(categoryNames) { vm.setCategoryNames(categoryNames) }
 
     fun hide(tx: TransactionEntity) {
         vm.markNotExpense(tx.id)
         scope.launch {
-            val result = snackbar.showSnackbar("Marked as not an expense", actionLabel = "Undo", duration = SnackbarDuration.Short)
+            val result = snackbar.showSnackbar(markedMessage, actionLabel = undoLabel, duration = SnackbarDuration.Short)
             if (result == SnackbarResult.ActionPerformed) vm.undoNotExpense(tx)
         }
     }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(Modifier.fillMaxSize()) {
-            item { ScreenHeader("Transactions", onBadgeClick = onOpenPrivacy) }
+            item { ScreenHeader(stringResource(R.string.txn_title), onBadgeClick = onOpenPrivacy) }
             item {
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = vm::setQuery,
-                    placeholder = { Text("Search merchant, amount, note") },
+                    placeholder = { Text(stringResource(R.string.txn_search_hint)) },
                     leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
                     trailingIcon = {
                         if (state.query.isNotEmpty()) {
-                            IconButton(onClick = { vm.setQuery("") }) { Icon(Icons.Outlined.Close, contentDescription = "Clear search") }
+                            IconButton(onClick = { vm.setQuery("") }) { Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.txn_clear_search)) }
                         }
                     },
                     singleLine = true,
@@ -112,9 +122,9 @@ fun TransactionsScreen(
             if (!state.loading && state.groups.isEmpty()) {
                 item {
                     Column(Modifier.fillMaxWidth().padding(40.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Nothing here", style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.txn_empty_title), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Try a different date range or filter.",
+                            stringResource(R.string.txn_empty_body),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -135,7 +145,7 @@ fun TransactionsScreen(
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-        ) { Icon(Icons.Outlined.Add, contentDescription = "Add expense") }
+        ) { Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.txn_add_expense)) }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
 }
@@ -153,13 +163,13 @@ private fun FilterRow(state: TransactionsUiState, vm: TransactionsViewModel) {
                 FilterChip(
                     selected = state.category != null,
                     onClick = { categoryMenu = true },
-                    label = { Text(state.category?.label ?: "Category") },
+                    label = { Text(state.category?.displayName() ?: stringResource(R.string.txn_filter_category)) },
                     trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, contentDescription = null) },
                 )
                 DropdownMenu(expanded = categoryMenu, onDismissRequest = { categoryMenu = false }) {
-                    DropdownMenuItem(text = { Text("All categories") }, onClick = { vm.setCategory(null); categoryMenu = false })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.txn_all_categories)) }, onClick = { vm.setCategory(null); categoryMenu = false })
                     Category.entries.forEach { c ->
-                        DropdownMenuItem(text = { Text(c.label) }, onClick = { vm.setCategory(c); categoryMenu = false })
+                        DropdownMenuItem(text = { Text(c.displayName()) }, onClick = { vm.setCategory(c); categoryMenu = false })
                     }
                 }
             }
@@ -169,12 +179,12 @@ private fun FilterRow(state: TransactionsUiState, vm: TransactionsViewModel) {
                 FilterChip(
                     selected = state.type != TypeFilter.ALL,
                     onClick = { typeMenu = true },
-                    label = { Text(state.type.label) },
+                    label = { Text(stringResource(state.type.labelRes)) },
                     trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, contentDescription = null) },
                 )
                 DropdownMenu(expanded = typeMenu, onDismissRequest = { typeMenu = false }) {
                     TypeFilter.entries.forEach { t ->
-                        DropdownMenuItem(text = { Text(t.label) }, onClick = { vm.setType(t); typeMenu = false })
+                        DropdownMenuItem(text = { Text(stringResource(t.labelRes)) }, onClick = { vm.setType(t); typeMenu = false })
                     }
                 }
             }
@@ -186,8 +196,8 @@ private fun FilterRow(state: TransactionsUiState, vm: TransactionsViewModel) {
 private fun DayHeader(group: DayGroup) {
     val today = LocalDate.now()
     val label = when (group.date) {
-        today -> "Today"
-        today.minusDays(1) -> "Yesterday"
+        today -> stringResource(R.string.txn_today)
+        today.minusDays(1) -> stringResource(R.string.txn_yesterday)
         else -> group.date.format(DAY_HEADER)
     }
     Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 4.dp)) {
@@ -217,7 +227,7 @@ private fun SwipeableRow(tx: TransactionEntity, onClick: () -> Unit, onNotExpens
                     .background(MaterialTheme.colorScheme.tertiary)
                     .padding(end = 20.dp),
             ) {
-                Text("Not an expense", color = MaterialTheme.colorScheme.onTertiary, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.txn_not_expense), color = MaterialTheme.colorScheme.onTertiary, fontWeight = FontWeight.Bold)
             }
         },
     ) {

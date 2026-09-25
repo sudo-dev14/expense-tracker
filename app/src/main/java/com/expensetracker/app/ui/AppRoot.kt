@@ -20,13 +20,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.annotation.StringRes
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.ui.export.ExportScreen
 import com.expensetracker.app.ui.home.HomeScreen
 import com.expensetracker.app.ui.onboarding.OnboardingFlow
@@ -45,12 +48,12 @@ object Routes {
     const val RULES = "rules"
 }
 
-private data class Tab(val route: String, val label: String, val icon: ImageVector)
+private data class Tab(val route: String, @StringRes val label: Int, val icon: ImageVector)
 
 private val tabs = listOf(
-    Tab(Routes.HOME, "Home", Icons.Outlined.Home),
-    Tab(Routes.TRANSACTIONS, "Transactions", Icons.AutoMirrored.Outlined.ReceiptLong),
-    Tab(Routes.SETTINGS, "Settings", Icons.Outlined.Settings),
+    Tab(Routes.HOME, R.string.nav_home, Icons.Outlined.Home),
+    Tab(Routes.TRANSACTIONS, R.string.nav_transactions, Icons.AutoMirrored.Outlined.ReceiptLong),
+    Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Outlined.Settings),
 )
 
 /** Id of the transaction being edited; [NEW_TRANSACTION] opens the "add expense" sheet. */
@@ -95,7 +98,7 @@ private fun MainScaffold(container: AppContainer) {
                             selected = currentRoute == tab.route,
                             onClick = { openTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(tab.label) },
+                            label = { Text(stringResource(tab.label)) },
                             colors = NavigationBarItemDefaults.colors(
                                 indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                                 selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,

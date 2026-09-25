@@ -1,6 +1,7 @@
 package com.expensetracker.app.ui.export
 
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,6 +40,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -46,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.export.ExportOptions
 import com.expensetracker.app.ui.components.AppCard
@@ -104,20 +108,21 @@ class ExportViewModel(private val container: AppContainer) : ViewModel() {
 
     fun fileName(): String = state.value.range?.let { container.pdfExporter.fileName(it) } ?: "expenses.pdf"
 
-    suspend fun saveTo(uri: Uri, resolver: ContentResolver): Boolean = withContext(Dispatchers.IO) {
+    /** [localized] is the Activity context, so the PDF uses the in-app language. */
+    suspend fun saveTo(localized: Context, uri: Uri, resolver: ContentResolver): Boolean = withContext(Dispatchers.IO) {
         val s = state.value
         val range = s.range ?: return@withContext false
         val txns = container.repository.inRange(range.startMillis(zone), range.endMillisExclusive(zone))
         runCatching {
-            resolver.openOutputStream(uri)?.use { container.pdfExporter.write(it, range, txns, s.options) } != null
+            resolver.openOutputStream(uri)?.use { container.pdfExporter.write(localized, it, range, txns, s.options) } != null
         }.getOrDefault(false)
     }
 
-    suspend fun shareUri(): Uri? = withContext(Dispatchers.IO) {
+    suspend fun shareUri(localized: Context): Uri? = withContext(Dispatchers.IO) {
         val s = state.value
         val range = s.range ?: return@withContext null
         val txns = container.repository.inRange(range.startMillis(zone), range.endMillisExclusive(zone))
-        container.pdfExporter.writeForSharing(range, txns, s.options)
+        container.pdfExporter.writeForSharing(localized, range, txns, s.options)
     }
 }
 
@@ -129,18 +134,21 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
+    val savedMessage = stringResource(R.string.export_saved)
+    val saveFailedMessage = stringResource(R.string.export_save_failed)
+    val shareChooserTitle = stringResource(R.string.export_share_chooser)
 
     val saveLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { uri ->
         if (uri != null) scope.launch {
-            val ok = vm.saveTo(uri, context.contentResolver)
-            snackbar.showSnackbar(if (ok) "Report saved" else "Couldn't save the report")
+            val ok = vm.saveTo(context, uri, context.contentResolver)
+            snackbar.showSnackbar(if (ok) savedMessage else saveFailedMessage)
         }
     }
 
     Column(Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(56.dp).padding(horizontal = 8.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back") }
-            Text("Export report", style = MaterialTheme.typography.titleMedium)
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back)) }
+            Text(stringResource(R.string.export_title), style = MaterialTheme.typography.titleMedium)
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             AppCard(Modifier.padding(horizontal = 20.dp)) {
@@ -148,10 +156,14 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
                     Icon(Icons.Outlined.PictureAsPdf, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
                     Column {
                         state.range?.let {
-                            Text("${it.start.format(FULL_DATE)} – ${it.endInclusive.format(FULL_DATE)}", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.export_date_span, it.start.format(FULL_DATE), it.endInclusive.format(FULL_DATE)), fontWeight = FontWeight.Bold)
                         }
                         Text(
-                            "${state.includedCount} transactions · about $pages page${if (pages == 1) "" else "s"}",
+                            stringResource(
+                                R.string.export_count_and_pages,
+                                pluralStringResource(R.plurals.export_txn_count, state.includedCount, state.includedCount),
+                                pluralStringResource(R.plurals.export_pages, pages, pages),
+                            ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -159,19 +171,19 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(22.dp))
-            SectionLabel("Date range", Modifier.padding(horizontal = 20.dp))
+            SectionLabel(stringResource(R.string.export_date_range), Modifier.padding(horizontal = 20.dp))
             Spacer(Modifier.height(8.dp))
             RangeChips(state.preset, state.customRange, vm::selectPreset, vm::selectCustom, PaddingValues(horizontal = 20.dp))
             Spacer(Modifier.height(20.dp))
-            SectionLabel("Include", Modifier.padding(horizontal = 20.dp))
+            SectionLabel(stringResource(R.string.export_include), Modifier.padding(horizontal = 20.dp))
             Spacer(Modifier.height(6.dp))
             AppCard(Modifier.padding(horizontal = 20.dp), padding = 0.dp) {
                 Column(Modifier.padding(horizontal = 16.dp)) {
                     val o = state.options
-                    OptionRow("Summary & totals", o.summary) { vm.setOptions(o.copy(summary = it)) }
-                    OptionRow("Category chart", o.categoryChart) { vm.setOptions(o.copy(categoryChart = it)) }
-                    OptionRow("Transaction list", o.transactionList) { vm.setOptions(o.copy(transactionList = it)) }
-                    OptionRow("Income", o.includeIncome, last = true) { vm.setOptions(o.copy(includeIncome = it)) }
+                    OptionRow(stringResource(R.string.export_opt_summary), o.summary) { vm.setOptions(o.copy(summary = it)) }
+                    OptionRow(stringResource(R.string.export_opt_chart), o.categoryChart) { vm.setOptions(o.copy(categoryChart = it)) }
+                    OptionRow(stringResource(R.string.export_opt_list), o.transactionList) { vm.setOptions(o.copy(transactionList = it)) }
+                    OptionRow(stringResource(R.string.export_opt_income), o.includeIncome, last = true) { vm.setOptions(o.copy(includeIncome = it)) }
                 }
             }
         }
@@ -179,7 +191,7 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
                 Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
-                    "The PDF is created on this phone. Sharing it sends the file to whichever app you pick.",
+                    stringResource(R.string.export_privacy_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -191,23 +203,23 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
                     enabled = state.range != null,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(26.dp),
-                ) { Text("Save to phone", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.export_save), fontWeight = FontWeight.Bold) }
                 Button(
                     onClick = {
                         scope.launch {
-                            val uri = vm.shareUri() ?: return@launch
+                            val uri = vm.shareUri(context) ?: return@launch
                             val send = Intent(Intent.ACTION_SEND).apply {
                                 type = "application/pdf"
                                 putExtra(Intent.EXTRA_STREAM, uri)
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
-                            context.startActivity(Intent.createChooser(send, "Share report"))
+                            context.startActivity(Intent.createChooser(send, shareChooserTitle))
                         }
                     },
                     enabled = state.range != null,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(26.dp),
-                ) { Text("Share…", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.export_share), fontWeight = FontWeight.Bold) }
             }
         }
         SnackbarHost(snackbar)

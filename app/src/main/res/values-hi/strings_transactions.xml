@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Transactions list -->
+    <string name="txn_title">लेन-देन</string>
+    <string name="txn_search_hint">दुकान, रकम या नोट खोजें</string>
+    <string name="txn_clear_search">खोज हटाएँ</string>
+    <string name="txn_empty_title">यहाँ कुछ नहीं है</string>
+    <string name="txn_empty_body">कोई और तारीख़ या फ़िल्टर चुनकर देखें।</string>
+    <string name="txn_add_expense">ख़र्च जोड़ें</string>
+    <string name="txn_not_expense">यह ख़र्च नहीं है</string>
+    <string name="txn_marked_not_expense">ख़र्च से हटा दिया गया</string>
+    <string name="txn_filter_category">श्रेणी</string>
+    <string name="txn_all_categories">सभी श्रेणियाँ</string>
+    <string name="txn_type_all">सभी तरह के</string>
+    <string name="txn_type_spent">ख़र्च</string>
+    <string name="txn_type_received">मिले</string>
+    <string name="txn_today">आज</string>
+    <string name="txn_yesterday">कल</string>
+
+    <!-- Edit / add sheet -->
+    <string name="edit_new_avatar">नया</string>
+    <string name="edit_add_title">लेन-देन जोड़ें</string>
+    <string name="edit_unknown_payee">पता नहीं किसे दिया</string>
+    <string name="edit_amount">रकम (₹)</string>
+    <string name="edit_from">किससे मिले</string>
+    <string name="edit_paid_to">किसे दिया</string>
+    <string name="edit_category">श्रेणी</string>
+    <string name="edit_rule">“%1$s” को हमेशा %2$s में रखें</string>
+    <plurals name="edit_rule_with_updates">
+        <item quantity="one">“%1$s” को हमेशा %2$s में रखें (पिछला %3$d लेन-देन भी बदलेगा)</item>
+        <item quantity="other">“%1$s” को हमेशा %2$s में रखें (पिछले %3$d लेन-देन भी बदलेंगे)</item>
+    </plurals>
+    <string name="edit_account">खाता</string>
+    <string name="edit_paid_via">कैसे दिया</string>
+    <string name="edit_note">नोट</string>
+    <string name="edit_original_message">असली मैसेज</string>
+    <string name="edit_original_message_from">असली मैसेज · %1$s से</string>
+    <string name="edit_add">जोड़ें</string>
+
+    <!-- Needs review -->
+    <string name="review_title">जाँच करें</string>
+    <plurals name="review_left">
+        <item quantity="one">%d बाकी</item>
+        <item quantity="other">%d बाकी</item>
+    </plurals>
+    <string name="review_all_caught_up">सब हो गया</string>
+    <string name="review_nothing_to_check">अभी कुछ भी जाँचना नहीं है।</string>
+    <string name="review_ignore">छोड़ें</string>
+    <string name="review_edit">बदलें</string>
+    <string name="review_looks_right">सही है</string>
+    <string name="review_no_payee">पता नहीं चला किसे पैसे दिए</string>
+    <string name="review_unfamiliar_format">मैसेज का फ़ॉर्मेट अनजान है</string>
+    <string name="review_from">%1$s से</string>
+    <string name="review_we_think">हमें लगता है यह है</string>
+    <string name="review_amount">रकम</string>
+    <string name="review_paid_to">किसे दिया</string>
+    <string name="review_category">श्रेणी</string>
+    <string name="review_account">खाता</string>
+    <string name="review_unknown">पता नहीं</string>
+</resources>

@@ -51,16 +51,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.accountLabel
 import com.expensetracker.app.data.categoryEnum
-import com.expensetracker.app.data.displayMerchant
 import com.expensetracker.app.ui.components.AppCard
+import com.expensetracker.app.ui.merchantName
 import com.expensetracker.app.ui.components.FULL_DATE
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.app.ui.components.SectionLabel
@@ -124,10 +127,10 @@ private fun OnboardingPage(
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(48.dp)) {
             if (onBack != null) {
                 IconButton(onClick = onBack, modifier = Modifier.padding(start = 0.dp)) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back))
                 }
             } else {
-                Text("Kharcha", style = MaterialTheme.typography.titleLarge.copy(fontFamily = com.expensetracker.app.ui.theme.DisplayFamily, fontWeight = FontWeight.SemiBold))
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge.copy(fontFamily = com.expensetracker.app.ui.theme.DisplayFamily, fontWeight = FontWeight.SemiBold))
             }
             Spacer(Modifier.weight(1f))
             Text(stepLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -150,8 +153,8 @@ private fun PrimaryButton(text: String, onClick: () -> Unit) {
 private fun PrivacyPromise(onContinue: () -> Unit) {
     var showHowTo by remember { mutableStateOf(false) }
     OnboardingPage(
-        stepLabel = "1 of 3",
-        bottom = { PrimaryButton("Continue", onContinue) },
+        stepLabel = stringResource(R.string.onb_step_of, 1, 3),
+        bottom = { PrimaryButton(stringResource(R.string.onb_continue), onContinue) },
     ) {
         Spacer(Modifier.height(40.dp))
         Box(
@@ -164,21 +167,21 @@ private fun PrivacyPromise(onContinue: () -> Unit) {
             Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
         }
         Spacer(Modifier.height(28.dp))
-        Text("Your messages stay on your phone.", style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp))
+        Text(stringResource(R.string.onb_privacy_title), style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp))
         Spacer(Modifier.height(14.dp))
         Text(
-            "Everything is read, stored and calculated on this device. Nothing is ever uploaded.",
+            stringResource(R.string.onb_privacy_body),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(32.dp))
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            PromisePoint("No internet permission", "Android itself blocks this app from going online, so nothing can be sent anywhere.")
-            PromisePoint("No account, no login", "No email, no phone number, no sign-up.")
-            PromisePoint("No ads, trackers or analytics", "We never see how you use the app.")
+            PromisePoint(stringResource(R.string.onb_promise_internet_title), stringResource(R.string.onb_promise_internet_body))
+            PromisePoint(stringResource(R.string.onb_promise_account_title), stringResource(R.string.onb_promise_account_body))
+            PromisePoint(stringResource(R.string.onb_promise_ads_title), stringResource(R.string.onb_promise_ads_body))
         }
         TextButton(onClick = { showHowTo = true }, modifier = Modifier.padding(top = 16.dp)) {
-            Text("How to check this yourself", fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)
+            Text(stringResource(R.string.onb_how_to_check), fontWeight = FontWeight.SemiBold, textDecoration = TextDecoration.Underline)
         }
     }
     if (showHowTo) HowToVerifyDialog(onDismiss = { showHowTo = false })
@@ -188,16 +191,11 @@ private fun PrivacyPromise(onContinue: () -> Unit) {
 fun HowToVerifyDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Got it") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.onb_verify_got_it)) } },
         icon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
-        title = { Text("Check it yourself") },
+        title = { Text(stringResource(R.string.onb_verify_title)) },
         text = {
-            Text(
-                "Open your phone's Settings › Apps › Kharcha › Permissions (or \"App info\").\n\n" +
-                    "You'll see there is no network or internet access listed. Android enforces this, " +
-                    "so the app physically cannot send your data anywhere.\n\n" +
-                    "You can also turn on Airplane mode: everything keeps working."
-            )
+            Text(stringResource(R.string.onb_verify_body))
         },
     )
 }
@@ -221,34 +219,34 @@ private fun PromisePoint(title: String, body: String) {
 @Composable
 private fun AutoTracking(onBack: () -> Unit, onTurnOn: () -> Unit, onSkip: () -> Unit) {
     OnboardingPage(
-        stepLabel = "2 of 3",
+        stepLabel = stringResource(R.string.onb_step_of, 2, 3),
         onBack = onBack,
         bottom = {
-            PrimaryButton("Turn on auto-tracking", onTurnOn)
+            PrimaryButton(stringResource(R.string.onb_auto_turn_on), onTurnOn)
             TextButton(onClick = onSkip, modifier = Modifier.fillMaxWidth().height(48.dp)) {
-                Text("Skip — I'll add expenses manually", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.onb_auto_skip), fontWeight = FontWeight.SemiBold)
             }
         },
     ) {
         Spacer(Modifier.height(24.dp))
-        Text("Track spending automatically", style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp, lineHeight = 37.sp))
+        Text(stringResource(R.string.onb_auto_title), style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp, lineHeight = 37.sp))
         Spacer(Modifier.height(12.dp))
         Text(
-            "The app picks up your payment messages and builds your expense history for you. No typing, no effort.",
+            stringResource(R.string.onb_auto_body),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(28.dp))
         AppCard(padding = 20.dp) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Quality(Icons.Outlined.WifiOff, "Works 100% offline", "No internet needed. The app has no network access at all.")
-                Quality(Icons.Outlined.PhoneAndroid, "Stays on your phone", "Everything is processed and stored right here.")
-                Quality(Icons.Outlined.DoneAll, "Only your spending", "Picks up payments. Everything else is left alone.")
+                Quality(Icons.Outlined.WifiOff, stringResource(R.string.onb_quality_offline_title), stringResource(R.string.onb_quality_offline_body))
+                Quality(Icons.Outlined.PhoneAndroid, stringResource(R.string.onb_quality_local_title), stringResource(R.string.onb_quality_local_body))
+                Quality(Icons.Outlined.DoneAll, stringResource(R.string.onb_quality_spending_title), stringResource(R.string.onb_quality_spending_body))
             }
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            "You can switch auto-tracking off any time in Settings.",
+            stringResource(R.string.onb_auto_switch_off_hint),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -276,27 +274,27 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
     val state by container.importer.state.collectAsStateWithLifecycle()
     val numbers = remember { NumberFormat.getIntegerInstance(Locale("en", "IN")) }
     OnboardingPage(
-        stepLabel = "3 of 3",
+        stepLabel = stringResource(R.string.onb_step_of, 3, 3),
         bottom = {
             if (state.finished) {
-                PrimaryButton("See my spending", onContinue)
+                PrimaryButton(stringResource(R.string.onb_import_see_spending), onContinue)
             } else {
                 OutlinedButton(
                     onClick = onContinue,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(28.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                ) { Text("Continue — finish in background", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(R.string.onb_import_continue_background), fontWeight = FontWeight.Bold) }
             }
         },
     ) {
         Spacer(Modifier.height(24.dp))
         Text(
-            if (state.finished) "All set!" else "Finding your transactions…",
+            if (state.finished) stringResource(R.string.onb_import_done_title) else stringResource(R.string.onb_import_running_title),
             style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
         )
         Spacer(Modifier.height(10.dp))
-        Text("All on this phone, fully offline.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.onb_import_offline_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(28.dp))
         LinearProgressIndicator(
             progress = { state.progress },
@@ -305,20 +303,20 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
         )
         Spacer(Modifier.height(10.dp))
         Row {
-            Text("${(state.progress * 100).toInt()}%", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.onb_import_percent, (state.progress * 100).toInt()), style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.weight(1f))
             state.oldestDate?.let {
-                Text("${it.toLocalDate().format(FULL_DATE)} → today", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.onb_import_date_range, it.toLocalDate().format(FULL_DATE)), style = MaterialTheme.typography.bodyMedium)
             }
         }
         Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatTile(numbers.format(state.scanned), "messages checked", Modifier.weight(1f))
-            StatTile(numbers.format(state.found), "transactions found", Modifier.weight(1f), highlight = true)
+            StatTile(numbers.format(state.scanned), pluralStringResource(R.plurals.onb_import_messages_checked, state.scanned), Modifier.weight(1f))
+            StatTile(numbers.format(state.found), pluralStringResource(R.plurals.onb_import_transactions_found, state.found), Modifier.weight(1f), highlight = true)
         }
         if (state.recent.isNotEmpty()) {
             Spacer(Modifier.height(24.dp))
-            SectionLabel("Just found")
+            SectionLabel(stringResource(R.string.onb_import_just_found))
             Spacer(Modifier.height(10.dp))
             AppCard(padding = 0.dp) {
                 Column {
@@ -328,9 +326,9 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                         ) {
-                            MerchantAvatar(tx.displayMerchant, tx.categoryEnum, size = 36.dp)
+                            MerchantAvatar(tx.merchantName(), tx.categoryEnum, size = 36.dp)
                             Column(Modifier.weight(1f)) {
-                                Text(tx.displayMerchant, fontWeight = FontWeight.SemiBold)
+                                Text(tx.merchantName(), fontWeight = FontWeight.SemiBold)
                                 Text(
                                     listOfNotNull(tx.accountLabel, tx.timestamp.toLocalDate().format(FULL_DATE)).joinToString(" · "),
                                     style = MaterialTheme.typography.bodySmall,

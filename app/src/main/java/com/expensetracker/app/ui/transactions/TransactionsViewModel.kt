@@ -1,8 +1,10 @@
 package com.expensetracker.app.ui.transactions
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.Status
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.accountLabel
@@ -26,7 +28,11 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-enum class TypeFilter(val label: String) { ALL("All types"), SPENT("Spent"), RECEIVED("Received") }
+enum class TypeFilter(@StringRes val labelRes: Int) {
+    ALL(R.string.txn_type_all),
+    SPENT(R.string.txn_type_spent),
+    RECEIVED(R.string.txn_type_received),
+}
 
 data class DayGroup(val date: LocalDate, val netMinor: Long, val items: List<TransactionEntity>)
 
@@ -46,14 +52,17 @@ class TransactionsViewModel(private val container: AppContainer) : ViewModel() {
     private val query = MutableStateFlow("")
     private val type = MutableStateFlow(TypeFilter.ALL)
 
+    /** Category names in the app language, supplied by the UI so search also matches them. */
+    private val categoryNames = MutableStateFlow<Map<Category, String>>(emptyMap())
+
     private val rangeTxns = container.selectedRange().flatMapLatest { (preset, custom, range) ->
         container.repository.observeInRange(range.startMillis(zone), range.endMillisExclusive(zone))
             .map { Triple(preset, custom, it) }
     }
 
     val state: StateFlow<TransactionsUiState> = combine(
-        rangeTxns, query, container.filters.category, type,
-    ) { (preset, custom, txns), q, category, typeFilter ->
+        rangeTxns, query, container.filters.category, type, categoryNames,
+    ) { (preset, custom, txns), q, category, typeFilter, names ->
         val filtered = txns.filter { tx ->
             (category == null || tx.categoryEnum == category) &&
                 when (typeFilter) {
@@ -61,7 +70,7 @@ class TransactionsViewModel(private val container: AppContainer) : ViewModel() {
                     TypeFilter.SPENT -> tx.type == TransactionType.DEBIT
                     TypeFilter.RECEIVED -> tx.type == TransactionType.CREDIT
                 } &&
-                matches(tx, q)
+                matches(tx, q, names)
         }
         TransactionsUiState(
             preset = preset,
@@ -78,16 +87,17 @@ class TransactionsViewModel(private val container: AppContainer) : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TransactionsUiState())
 
-    private fun matches(tx: TransactionEntity, q: String): Boolean {
+    private fun matches(tx: TransactionEntity, q: String, names: Map<Category, String>): Boolean {
         if (q.isBlank()) return true
         val needle = q.trim().lowercase()
         val amountText = Money.format(tx.amountMinor).replace(",", "")
-        return listOfNotNull(tx.merchant, tx.note, tx.accountLabel, tx.categoryEnum.label, amountText, (tx.amountMinor / 100).toString())
+        return listOfNotNull(tx.merchant, tx.note, tx.accountLabel, tx.categoryEnum.label, names[tx.categoryEnum], amountText, (tx.amountMinor / 100).toString())
             .any { needle in it.lowercase().replace(",", "") }
     }
 
     fun setQuery(q: String) { query.value = q }
     fun setType(t: TypeFilter) { type.value = t }
+    fun setCategoryNames(names: Map<Category, String>) { categoryNames.value = names }
     fun setCategory(c: Category?) { container.filters.category.value = c }
     fun selectPreset(p: RangePreset) { container.filters.preset.value = p }
     fun selectCustom(r: DateRange) {

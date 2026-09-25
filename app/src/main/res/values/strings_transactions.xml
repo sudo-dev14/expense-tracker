@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transactions list, edit/add sheet and the "Needs review" screen. -->
+<resources>
+    <!-- Transactions list -->
+    <string name="txn_title">Transactions</string>
+    <string name="txn_search_hint">Search merchant, amount, note</string>
+    <string name="txn_clear_search">Clear search</string>
+    <string name="txn_empty_title">Nothing here</string>
+    <string name="txn_empty_body">Try a different date range or filter.</string>
+    <string name="txn_add_expense">Add expense</string>
+    <string name="txn_not_expense">Not an expense</string>
+    <string name="txn_marked_not_expense">Marked as not an expense</string>
+    <string name="txn_filter_category">Category</string>
+    <string name="txn_all_categories">All categories</string>
+    <string name="txn_type_all">All types</string>
+    <string name="txn_type_spent">Spent</string>
+    <string name="txn_type_received">Received</string>
+    <string name="txn_today">Today</string>
+    <string name="txn_yesterday">Yesterday</string>
+
+    <!-- Edit / add sheet -->
+    <!-- Shown in the avatar (first letter) while adding a new entry. -->
+    <string name="edit_new_avatar">New</string>
+    <string name="edit_add_title">Add a transaction</string>
+    <string name="edit_unknown_payee">Unknown payee</string>
+    <string name="edit_amount">Amount (₹)</string>
+    <string name="edit_from">From</string>
+    <string name="edit_paid_to">Paid to</string>
+    <string name="edit_category">Category</string>
+    <!-- %1$s = merchant, %2$s = category -->
+    <string name="edit_rule">Always put “%1$s” in %2$s</string>
+    <!-- %1$s = merchant, %2$s = category, %3$d = number of past transactions that will change -->
+    <plurals name="edit_rule_with_updates">
+        <item quantity="one">Always put “%1$s” in %2$s (updates %3$d past transaction)</item>
+        <item quantity="other">Always put “%1$s” in %2$s (updates %3$d past transactions)</item>
+    </plurals>
+    <string name="edit_account">Account</string>
+    <string name="edit_paid_via">Paid via</string>
+    <string name="edit_note">Note</string>
+    <string name="edit_original_message">Original message</string>
+    <!-- %1$s = SMS sender id -->
+    <string name="edit_original_message_from">Original message · from %1$s</string>
+    <string name="edit_add">Add</string>
+
+    <!-- Needs review -->
+    <string name="review_title">Needs review</string>
+    <plurals name="review_left">
+        <item quantity="one">%d left</item>
+        <item quantity="other">%d left</item>
+    </plurals>
+    <string name="review_all_caught_up">All caught up</string>
+    <string name="review_nothing_to_check">Nothing needs checking right now.</string>
+    <string name="review_ignore">Ignore</string>
+    <string name="review_edit">Edit</string>
+    <string name="review_looks_right">Looks right</string>
+    <string name="review_no_payee">Couldn\'t tell who was paid</string>
+    <string name="review_unfamiliar_format">Unfamiliar message format</string>
+    <!-- %1$s = SMS sender id -->
+    <string name="review_from">From %1$s</string>
+    <string name="review_we_think">We think this is</string>
+    <string name="review_amount">Amount</string>
+    <string name="review_paid_to">Paid to</string>
+    <string name="review_category">Category</string>
+    <string name="review_account">Account</string>
+    <string name="review_unknown">Unknown</string>
+</resources>

@@ -6,9 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.expensetracker.app.R
 import com.expensetracker.app.data.ThemeMode
+import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.core.analytics.RangePreset
 import com.expensetracker.core.model.Category
 import com.expensetracker.core.model.Channel
+import com.expensetracker.core.model.TransactionType
 
 // The core module is plain JVM, so its enums carry English labels only. The app shows these
 // translated names instead; never display the core `label` properties directly.
@@ -62,6 +64,16 @@ fun ThemeMode.labelRes(): Int = when (this) {
 @Composable fun Channel.displayName(): String = stringResource(labelRes())
 @Composable fun RangePreset.displayName(): String = stringResource(labelRes())
 @Composable fun ThemeMode.displayName(): String = stringResource(labelRes())
+
+/** Payee name, or a translated fallback when the message didn't include one. */
+@Composable
+fun TransactionEntity.merchantName(): String = merchant ?: stringResource(fallbackMerchantRes())
+
+fun TransactionEntity.merchantName(context: Context): String = merchant ?: context.getString(fallbackMerchantRes())
+
+@StringRes
+private fun TransactionEntity.fallbackMerchantRes(): Int =
+    if (type == TransactionType.CREDIT) R.string.merchant_money_received else R.string.merchant_payment
 
 /** For code outside composition (PDF export, view models): pass a localized Activity context. */
 fun Category.displayName(context: Context): String = context.getString(labelRes())

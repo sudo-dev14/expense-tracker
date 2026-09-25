@@ -34,6 +34,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
@@ -41,13 +43,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,12 +66,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
 import com.expensetracker.app.data.Source
 import com.expensetracker.app.data.Status
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.accountLabel
 import com.expensetracker.app.data.categoryEnum
 import com.expensetracker.app.ui.NEW_TRANSACTION
+import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.app.ui.components.formatDateTime
 import com.expensetracker.core.model.Category
@@ -160,6 +170,18 @@ class EditTransactionViewModel(private val container: AppContainer, private val 
     }
 }
 
+private const val CLOSE_DRAG_FRACTION = 0.35f
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun draggedFarEnoughToClose(state: SheetState, restOffset: Float, sheetHeight: Float): Boolean {
+    val offset = runCatching { state.requireOffset() }.getOrNull() ?: return true
+    if (restOffset.isNaN() || sheetHeight <= 0f) return true
+    val dragged = offset - restOffset
+    // Not dragged at all: Back or a tap outside the sheet, which still close it.
+    if (dragged < 1f) return true
+    return dragged >= sheetHeight * CLOSE_DRAG_FRACTION
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss: () -> Unit) {
@@ -167,7 +189,26 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
     val vmKey = remember(transactionId) { "edit-$transactionId-${System.nanoTime()}" }
     val vm: EditTransactionViewModel = viewModel(key = vmKey) { EditTransactionViewModel(container, transactionId) }
     val state by vm.state.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Swiping down only closes the sheet once it has been dragged at least 35% of its height;
+    // shorter drags and quick flicks snap it back. Back and tapping outside still close it.
+    var sheetHeightPx by remember { mutableFloatStateOf(0f) }
+    var restOffsetPx by remember { mutableFloatStateOf(Float.NaN) }
+    lateinit var sheetState: SheetState
+    sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { target ->
+            target != SheetValue.Hidden || draggedFarEnoughToClose(sheetState, restOffsetPx, sheetHeightPx)
+        },
+    )
+    // Remember where the sheet rests when fully open, so a drag can be measured from there.
+    LaunchedEffect(sheetState, sheetHeightPx) {
+        restOffsetPx = Float.NaN
+        snapshotFlow { runCatching { sheetState.requireOffset() }.getOrNull() }.collect { offset ->
+            if (offset != null && sheetState.currentValue == SheetValue.Expanded && (restOffsetPx.isNaN() || offset < restOffsetPx)) {
+                restOffsetPx = offset
+            }
+        }
+    }
     var showSms by remember { mutableStateOf(true) }
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -175,6 +216,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
         if (!state.loaded) return@ModalBottomSheet
         Column(
             Modifier
+                .onSizeChanged { sheetHeightPx = it.height.toFloat() }
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .navigationBarsPadding()
@@ -182,9 +224,11 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
         ) {
             val original = state.original
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                MerchantAvatar(state.merchant.ifBlank { if (state.isNew) "New" else "?" }, state.category, size = 52.dp)
+                val newAvatar = stringResource(R.string.edit_new_avatar)
+                MerchantAvatar(state.merchant.ifBlank { if (state.isNew) newAvatar else "?" }, state.category, size = 52.dp)
                 Column(Modifier.weight(1f)) {
-                    Text(if (state.isNew) "Add a transaction" else state.merchant.ifBlank { "Unknown payee" }, style = MaterialTheme.typography.titleLarge)
+                    val unknownPayee = stringResource(R.string.edit_unknown_payee)
+                    Text(if (state.isNew) stringResource(R.string.edit_add_title) else state.merchant.ifBlank { unknownPayee }, style = MaterialTheme.typography.titleLarge)
                     Text(
                         state.timestamp.formatDateTime(),
                         style = MaterialTheme.typography.bodySmall,
@@ -196,7 +240,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
             Spacer(Modifier.height(18.dp))
 
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                listOf(TransactionType.DEBIT to "Spent", TransactionType.CREDIT to "Received").forEachIndexed { i, (t, label) ->
+                listOf(TransactionType.DEBIT to stringResource(R.string.txn_type_spent), TransactionType.CREDIT to stringResource(R.string.txn_type_received)).forEachIndexed { i, (t, label) ->
                     SegmentedButton(
                         selected = state.type == t,
                         onClick = { vm.update { it.copy(type = t, category = if (t == TransactionType.CREDIT) Category.INCOME else if (it.category == Category.INCOME) Category.OTHER else it.category) } },
@@ -209,7 +253,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                 OutlinedTextField(
                     value = state.amountText,
                     onValueChange = { v -> vm.update { it.copy(amountText = v.filter { c -> c.isDigit() || c == '.' || c == ',' }) } },
-                    label = { Text("Amount (₹)") },
+                    label = { Text(stringResource(R.string.edit_amount)) },
                     singleLine = true,
                     isError = state.amountText.isNotEmpty() && state.amountMinor == null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -218,7 +262,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                 OutlinedTextField(
                     value = state.merchant,
                     onValueChange = { v -> vm.update { it.copy(merchant = v) } },
-                    label = { Text(if (state.type == TransactionType.CREDIT) "From" else "Paid to") },
+                    label = { Text(stringResource(if (state.type == TransactionType.CREDIT) R.string.edit_from else R.string.edit_paid_to)) },
                     singleLine = true,
                     modifier = Modifier.weight(1.4f),
                 )
@@ -226,14 +270,14 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
 
             if (state.type == TransactionType.DEBIT) {
                 Spacer(Modifier.height(16.dp))
-                Text("Category", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.edit_category), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
                     Category.spendCategories.forEach { c ->
                         FilterChip(
                             selected = state.category == c,
                             onClick = { vm.update { it.copy(category = c) } },
-                            label = { Text(c.label) },
+                            label = { Text(c.displayName()) },
                             shape = RoundedCornerShape(18.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
@@ -256,12 +300,19 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                         .padding(end = 14.dp, top = 4.dp, bottom = 4.dp),
                 ) {
                     Checkbox(checked = state.applyToMerchant, onCheckedChange = { c -> vm.update { it.copy(applyToMerchant = c) } })
+                    val merchant = state.merchant.trim()
+                    val categoryName = state.category.displayName()
                     Text(
-                        buildString {
-                            append("Always put “${state.merchant.trim()}” in ${state.category.label}")
-                            if (state.otherWithMerchant > 0) {
-                                append(" (updates ${state.otherWithMerchant} past transaction${if (state.otherWithMerchant == 1) "" else "s"})")
-                            }
+                        if (state.otherWithMerchant > 0) {
+                            pluralStringResource(
+                                R.plurals.edit_rule_with_updates,
+                                state.otherWithMerchant,
+                                merchant,
+                                categoryName,
+                                state.otherWithMerchant,
+                            )
+                        } else {
+                            stringResource(R.string.edit_rule, merchant, categoryName)
                         },
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.bodyMedium,
@@ -272,8 +323,8 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
             if (original != null && (original.accountLabel != null || original.channel.name != "OTHER")) {
                 Spacer(Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    original.accountLabel?.let { InfoBox("Account", it, Modifier.weight(1f)) }
-                    if (original.channel.name != "OTHER") InfoBox("Paid via", original.channel.label, Modifier.weight(1f))
+                    original.accountLabel?.let { InfoBox(stringResource(R.string.edit_account), it, Modifier.weight(1f)) }
+                    if (original.channel.name != "OTHER") InfoBox(stringResource(R.string.edit_paid_via), original.channel.displayName(), Modifier.weight(1f))
                 }
             }
 
@@ -281,7 +332,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
             OutlinedTextField(
                 value = state.note,
                 onValueChange = { v -> vm.update { it.copy(note = v) } },
-                label = { Text("Note") },
+                label = { Text(stringResource(R.string.edit_note)) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -297,7 +348,8 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            "Original message${original.sender?.let { " · from $it" } ?: ""}",
+                            original.sender?.let { stringResource(R.string.edit_original_message_from, it) }
+                                ?: stringResource(R.string.edit_original_message),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.weight(1f),
                         )
@@ -318,19 +370,19 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                         onClick = { vm.delete(onDismiss) },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(26.dp),
-                    ) { Text("Delete") }
+                    ) { Text(stringResource(R.string.action_delete)) }
                     else -> OutlinedButton(
                         onClick = { vm.markNotExpense(onDismiss) },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(26.dp),
-                    ) { Text("Not an expense") }
+                    ) { Text(stringResource(R.string.txn_not_expense)) }
                 }
                 Button(
                     onClick = { vm.save(onDismiss) },
                     enabled = state.amountMinor != null,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(26.dp),
-                ) { Text(if (state.isNew) "Add" else "Save", fontWeight = FontWeight.Bold) }
+                ) { Text(stringResource(if (state.isNew) R.string.edit_add else R.string.action_save), fontWeight = FontWeight.Bold) }
             }
             Spacer(Modifier.height(16.dp))
         }
@@ -352,9 +404,9 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                         vm.update { it.copy(timestamp = date.atTime(time).atZone(zone).toInstant().toEpochMilli()) }
                     }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(stringResource(R.string.action_ok)) }
             },
-            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { showDatePicker = false }) { Text(stringResource(R.string.action_cancel)) } },
         ) { DatePicker(pickerState) }
     }
 }

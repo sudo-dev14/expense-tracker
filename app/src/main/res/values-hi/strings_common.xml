@@ -35,6 +35,9 @@
 
     <string name="lang_system">फ़ोन की भाषा</string>
 
+    <string name="merchant_money_received">पैसे मिले</string>
+    <string name="merchant_payment">पेमेंट</string>
+
     <string name="action_cancel">रद्द करें</string>
     <string name="action_delete">मिटाएँ</string>
     <string name="action_save">सेव करें</string>

@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +43,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
+import com.expensetracker.app.R
+import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.components.DonutChart
 import com.expensetracker.app.ui.components.DonutSlice
@@ -51,6 +55,8 @@ import com.expensetracker.app.ui.components.SpendingBars
 import com.expensetracker.app.ui.components.TransactionRow
 import com.expensetracker.app.ui.components.color
 import com.expensetracker.app.ui.theme.AmountStyle
+import com.expensetracker.core.analytics.Bucket
+import com.expensetracker.core.analytics.Granularity
 import com.expensetracker.core.analytics.RangePreset
 import com.expensetracker.core.format.Money
 import com.expensetracker.core.model.Category
@@ -72,7 +78,7 @@ fun HomeScreen(
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(Modifier.fillMaxSize()) {
-            item { ScreenHeader("Spending", onBadgeClick = onOpenPrivacy) }
+            item { ScreenHeader(stringResource(R.string.home_title), onBadgeClick = onOpenPrivacy) }
             item {
                 RangeChips(state.preset, state.customRange, vm::selectPreset, vm::selectCustom)
                 Spacer(Modifier.height(16.dp))
@@ -105,11 +111,11 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp, top = 20.dp),
                     ) {
-                        Text("Recent", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.home_recent), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                         TextButton(onClick = {
                             vm.filterCategory(null)
                             onSeeAll()
-                        }) { Text("See all") }
+                        }) { Text(stringResource(R.string.home_see_all)) }
                     }
                 }
                 state.recent.forEach { tx ->
@@ -124,18 +130,28 @@ fun HomeScreen(
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-        ) { Icon(Icons.Outlined.Add, contentDescription = "Add expense") }
+        ) { Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.home_add_expense)) }
     }
 }
 
-private val MONTH = DateTimeFormatter.ofPattern("MMMM", Locale.ENGLISH)
+// Created at use time, not cached: month names follow the current app language.
+private fun monthFormatter(): DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM", Locale.getDefault())
+
+/** Bucket dates formatted in the app language, same patterns as core's English `Bucket.label`. */
+private fun Bucket.displayLabel(granularity: Granularity): String = when (granularity) {
+    Granularity.DAY -> start.format(DateTimeFormatter.ofPattern("d MMM", Locale.getDefault()))
+    Granularity.MONTH -> start.format(DateTimeFormatter.ofPattern("MMM yy", Locale.getDefault()))
+    Granularity.YEAR -> start.year.toString()
+}
 
 @Composable
 private fun SummaryCard(state: HomeUiState) {
     val title = when (state.preset) {
-        RangePreset.THIS_MONTH -> "Spent in ${state.range?.start?.format(MONTH) ?: "this month"}"
-        RangePreset.ALL_TIME -> "Spent in total"
-        else -> "Spent"
+        RangePreset.THIS_MONTH -> state.range?.start?.format(monthFormatter())
+            ?.let { stringResource(R.string.home_spent_in_month, it) }
+            ?: stringResource(R.string.home_spent_this_month)
+        RangePreset.ALL_TIME -> stringResource(R.string.home_spent_total)
+        else -> stringResource(R.string.home_spent)
     }
     Column(
         Modifier
@@ -155,11 +171,17 @@ private fun SummaryCard(state: HomeUiState) {
             Text(Money.format(state.summary.spentMinor), style = AmountStyle, fontSize = 40.sp, color = onHero)
             state.changePercent?.let { change ->
                 val up = change > 0
+                val comparison = stringResource(state.comparisonLabelRes)
+                val changeDescription = stringResource(
+                    if (up) R.string.home_change_up_cd else R.string.home_change_down_cd,
+                    abs(change),
+                    comparison,
+                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
-                        .semantics { contentDescription = "${if (up) "Up" else "Down"} ${abs(change)} percent ${state.comparisonLabel}" },
+                        .semantics { contentDescription = changeDescription },
                 ) {
                     Icon(
                         if (up) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
@@ -168,7 +190,7 @@ private fun SummaryCard(state: HomeUiState) {
                         modifier = Modifier.size(14.dp),
                     )
                     Text(
-                        "${abs(change)}% ${state.comparisonLabel}",
+                        stringResource(R.string.home_change_percent, abs(change), comparison),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (up) upColor else MaterialTheme.colorScheme.primary,
@@ -179,11 +201,11 @@ private fun SummaryCard(state: HomeUiState) {
         HorizontalDivider(Modifier.padding(vertical = 14.dp), color = onHero.copy(alpha = 0.12f))
         Row {
             Column(Modifier.weight(1f)) {
-                Text("Income", fontSize = 12.sp, color = heroMuted)
+                Text(stringResource(R.string.home_income), fontSize = 12.sp, color = heroMuted)
                 Text(Money.format(state.summary.incomeMinor), fontWeight = FontWeight.Bold, fontSize = 17.sp, color = onHero)
             }
             Column(Modifier.weight(1f)) {
-                Text(if (state.summary.netMinor >= 0) "Net saved" else "Net overspent", fontSize = 12.sp, color = heroMuted)
+                Text(stringResource(if (state.summary.netMinor >= 0) R.string.home_net_saved else R.string.home_net_overspent), fontSize = 12.sp, color = heroMuted)
                 Text(
                     Money.format(state.summary.netMinor, signed = true),
                     fontWeight = FontWeight.Bold,
@@ -213,7 +235,7 @@ private fun ReviewBanner(count: Int, onClick: () -> Unit) {
             modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.tertiary),
         ) { Text("$count", color = MaterialTheme.colorScheme.onTertiary, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
         Text(
-            if (count == 1) "transaction needs a quick check" else "transactions need a quick check",
+            pluralStringResource(R.plurals.home_review_banner, count),
             color = MaterialTheme.colorScheme.onTertiaryContainer,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.weight(1f),
@@ -226,9 +248,9 @@ private fun ReviewBanner(count: Int, onClick: () -> Unit) {
 private fun AutoTrackingOffBanner(onOpenSettings: () -> Unit) {
     AppCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp).clickable(onClick = onOpenSettings)) {
         Column {
-            Text("Auto-tracking is off", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.home_autotrack_off_title), fontWeight = FontWeight.Bold)
             Text(
-                "Turn it on in Settings to fill in your expenses automatically — still fully offline.",
+                stringResource(R.string.home_autotrack_off_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -242,13 +264,13 @@ private fun EmptyState(onAdd: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 40.dp),
     ) {
-        Text("No transactions in this period", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleMedium)
         Text(
-            "Pick a longer range above, or add an expense yourself.",
+            stringResource(R.string.home_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        TextButton(onClick = onAdd) { Text("Add manually") }
+        TextButton(onClick = onAdd) { Text(stringResource(R.string.home_add_manually)) }
     }
 }
 
@@ -256,13 +278,16 @@ private fun EmptyState(onAdd: () -> Unit) {
 private fun CategoryCard(state: HomeUiState, onCategory: (Category) -> Unit) {
     AppCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp)) {
         Column {
-            Text("By category", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.home_by_category), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(12.dp))
+            val donutDescription = state.categories
+                .map { stringResource(R.string.home_category_share_cd, it.category.displayName(), (it.share * 100).toInt()) }
+                .joinToString()
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                 DonutChart(
                     slices = state.categories.map { DonutSlice(it.category.color, it.share) },
                     modifier = Modifier.size(132.dp).semantics {
-                        contentDescription = state.categories.joinToString { "${it.category.label} ${(it.share * 100).toInt()} percent" }
+                        contentDescription = donutDescription
                     },
                 )
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -277,7 +302,7 @@ private fun CategoryCard(state: HomeUiState, onCategory: (Category) -> Unit) {
                                 .padding(vertical = 5.dp),
                         ) {
                             Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(c.category.color))
-                            Text(c.category.label, fontSize = 14.sp, modifier = Modifier.weight(1f), maxLines = 1)
+                            Text(c.category.displayName(), fontSize = 14.sp, modifier = Modifier.weight(1f), maxLines = 1)
                             Text("${(c.share * 100).toInt()}%", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -293,10 +318,10 @@ private fun TrendCard(state: HomeUiState) {
     AppCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp)) {
         Column {
             Row(verticalAlignment = Alignment.Bottom) {
-                Text("Spending over time", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.home_trend_title), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 if (peak != null && peak.amountMinor > 0) {
                     Text(
-                        "Peak ${Money.compact(peak.amountMinor)} · ${peak.label}",
+                        stringResource(R.string.home_peak, Money.compact(peak.amountMinor), peak.displayLabel(state.bucketGranularity)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -306,9 +331,9 @@ private fun TrendCard(state: HomeUiState) {
             SpendingBars(state.buckets, Modifier.fillMaxWidth().height(100.dp))
             if (state.buckets.isNotEmpty()) {
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
-                    Text(state.buckets.first().label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(state.buckets.first().displayLabel(state.bucketGranularity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.weight(1f))
-                    Text(state.buckets.last().label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(state.buckets.last().displayLabel(state.bucketGranularity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -319,7 +344,7 @@ private fun TrendCard(state: HomeUiState) {
 private fun MerchantsCard(state: HomeUiState) {
     AppCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp), padding = 0.dp) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 6.dp)) {
-            Text("Top merchants", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 10.dp))
+            Text(stringResource(R.string.home_top_merchants), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 10.dp))
             state.merchants.forEach { m ->
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 Row(
@@ -331,7 +356,7 @@ private fun MerchantsCard(state: HomeUiState) {
                     Column(Modifier.weight(1f)) {
                         Text(m.name, fontWeight = FontWeight.SemiBold)
                         Text(
-                            if (m.count == 1) "1 payment" else "${m.count} payments",
+                            pluralStringResource(R.plurals.home_payments, m.count, m.count),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

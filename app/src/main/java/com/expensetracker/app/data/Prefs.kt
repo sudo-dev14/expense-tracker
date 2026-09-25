@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-enum class ThemeMode(val label: String) { SYSTEM("System"), LIGHT("Light"), DARK("Dark") }
+/** Translated display names: ThemeMode.displayName() in ui/Labels.kt. */
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 /** Small local settings. Stored in app-private storage and excluded from backups. */
 class Prefs(context: Context) {
@@ -44,7 +45,10 @@ class Prefs(context: Context) {
         set(value) = sp.edit().putLong(KEY_LAST_SMS, value).apply()
 
     fun clear() {
-        sp.edit().clear().apply()
+        // Keep the language choice (Android 12 and below store it here): deleting data
+        // shouldn't switch the app's language.
+        val language = sp.getString(KEY_APP_LANGUAGE, null)
+        sp.edit().clear().putString(KEY_APP_LANGUAGE, language).apply()
         _onboardingDone.value = false
         _autoTracking.value = true
         _themeMode.value = ThemeMode.SYSTEM
@@ -55,5 +59,6 @@ class Prefs(context: Context) {
         const val KEY_AUTO_TRACKING = "auto_tracking"
         const val KEY_THEME = "theme_mode"
         const val KEY_LAST_SMS = "last_imported_sms_date"
+        const val KEY_APP_LANGUAGE = "app_language" // written by LanguageManager
     }
 }

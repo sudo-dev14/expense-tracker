@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home (Spending) screen and shared UI components. -->
+<resources>
+    <string name="home_title">Spending</string>
+    <string name="home_recent">Recent</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_add_expense">Add expense</string>
+
+    <!-- %1$s = full month name, e.g. "September" -->
+    <string name="home_spent_in_month">Spent in %1$s</string>
+    <string name="home_spent_this_month">Spent in this month</string>
+    <string name="home_spent_total">Spent in total</string>
+    <string name="home_spent">Spent</string>
+
+    <string name="home_vs_last_month">vs last month</string>
+    <string name="home_vs_previous_year">vs previous year</string>
+    <string name="home_vs_previous_period">vs previous period</string>
+    <!-- %1$d = percent change, %2$s = comparison, e.g. "12% vs last month" -->
+    <string name="home_change_percent">%1$d%% %2$s</string>
+    <string name="home_change_up_cd">Up %1$d percent %2$s</string>
+    <string name="home_change_down_cd">Down %1$d percent %2$s</string>
+
+    <string name="home_income">Income</string>
+    <string name="home_net_saved">Net saved</string>
+    <string name="home_net_overspent">Net overspent</string>
+
+    <!-- Shown next to a bubble with the count, so the number is not repeated here. -->
+    <plurals name="home_review_banner">
+        <item quantity="one">transaction needs a quick check</item>
+        <item quantity="other">transactions need a quick check</item>
+    </plurals>
+
+    <string name="home_autotrack_off_title">Auto-tracking is off</string>
+    <string name="home_autotrack_off_body">Turn it on in Settings to fill in your expenses automatically — still fully offline.</string>
+
+    <string name="home_empty_title">No transactions in this period</string>
+    <string name="home_empty_body">Pick a longer range above, or add an expense yourself.</string>
+    <string name="home_add_manually">Add manually</string>
+
+    <string name="home_by_category">By category</string>
+    <!-- Screen reader text for one donut slice: %1$s = category, %2$d = percent -->
+    <string name="home_category_share_cd">%1$s %2$d percent</string>
+
+    <string name="home_trend_title">Spending over time</string>
+    <!-- %1$s = amount, %2$s = date of the highest bar -->
+    <string name="home_peak">Peak %1$s · %2$s</string>
+
+    <string name="home_top_merchants">Top merchants</string>
+    <plurals name="home_payments">
+        <item quantity="one">%d payment</item>
+        <item quantity="other">%d payments</item>
+    </plurals>
+
+    <!-- Components -->
+    <string name="comp_offline">Offline</string>
+    <string name="comp_offline_badge_cd">Offline. Your data stays on this phone.</string>
+    <string name="comp_apply">Apply</string>
+    <!-- Custom date range chip: %1$s = start date, %2$s = end date -->
+    <string name="comp_custom_range">%1$s – %2$s</string>
+</resources>
