@@ -51,8 +51,20 @@ jobs:
           KHARCHA_VERSION_CODE: ${{ github.run_number }}
         run: |
           if [ -n "$KHARCHA_KEYSTORE_BASE64" ]; then
-            echo "$KHARCHA_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            printf '%s' "$KHARCHA_KEYSTORE_BASE64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/upload.jks"
             export KHARCHA_KEYSTORE_FILE="$RUNNER_TEMP/upload.jks"
+            # Diagnostics (no secrets printed): compare size and SHA-256 with your local upload.jks,
+            # e.g. `ls -l upload.jks` and `shasum -a 256 upload.jks`.
+            echo "Keystore from secret: $(stat -c %s "$KHARCHA_KEYSTORE_FILE") bytes, SHA-256 $(sha256sum "$KHARCHA_KEYSTORE_FILE" | cut -d' ' -f1)"
+            STOREPASS="$(printf '%s' "$KHARCHA_KEYSTORE_PASSWORD" | tr -d '\r\n')"
+            if keytool -list -keystore "$KHARCHA_KEYSTORE_FILE" -storepass "$STOREPASS" > "$RUNNER_TEMP/keytool.txt" 2>&1; then
+              echo "Keystore password opens the keystore."
+              grep -iE "alias name|keystore type|PrivateKeyEntry" "$RUNNER_TEMP/keytool.txt" || true
+            else
+              echo "::error::KHARCHA_KEYSTORE_PASSWORD doesn't open this keystore, or KHARCHA_KEYSTORE_BASE64 isn't a complete copy of it."
+              grep -vi "password" "$RUNNER_TEMP/keytool.txt" | head -5 || true
+            fi
+            rm -f "$RUNNER_TEMP/keytool.txt"
           else
             echo "::warning::Keystore secrets are not set, so the release bundle is unsigned and can't be uploaded to Play."
           fi
