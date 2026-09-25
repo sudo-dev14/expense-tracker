@@ -25,7 +25,7 @@ android {
         targetSdk = 35
         // CI passes an increasing number for Play uploads; local builds use 1.
         versionCode = System.getenv("KHARCHA_VERSION_CODE")?.toIntOrNull() ?: 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
     }
 
     signingConfigs {
