@@ -64,7 +64,7 @@ class PdfExporter(private val context: Context) {
     }
 
     fun fileName(range: DateRange): String =
-        "expenses_${range.start.format(FILE_DATE)}_${range.endInclusive.format(FILE_DATE)}.pdf"
+        "kharcha_${range.start.format(FILE_DATE)}_${range.endInclusive.format(FILE_DATE)}.pdf"
 
     /** Rough page count for the preview line. */
     fun estimatePages(txnCount: Int, options: ExportOptions): Int {
@@ -110,7 +110,7 @@ class PdfExporter(private val context: Context) {
         }
 
         private fun finishPage() {
-            canvas.drawText("Created on this phone · Page $pageNumber", MARGIN, PAGE_H - 24f, small)
+            canvas.drawText("Created on this phone with Kharcha · Page $pageNumber", MARGIN, PAGE_H - 24f, small)
             doc.finishPage(page)
         }
 
@@ -122,7 +122,7 @@ class PdfExporter(private val context: Context) {
 
         fun header(range: DateRange) {
             y += 22f
-            canvas.drawText("Expense report", MARGIN, y, title)
+            canvas.drawText("Kharcha · Expense report", MARGIN, y, title)
             y += 18f
             canvas.drawText(
                 "${range.start.format(LONG_DATE)} – ${range.endInclusive.format(LONG_DATE)}",

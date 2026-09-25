@@ -127,7 +127,7 @@ private fun OnboardingPage(
                     Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                 }
             } else {
-                Text("Expense Tracker", fontWeight = FontWeight.Bold)
+                Text("Kharcha", style = MaterialTheme.typography.titleLarge.copy(fontFamily = com.expensetracker.app.ui.theme.DisplayFamily, fontWeight = FontWeight.SemiBold))
             }
             Spacer(Modifier.weight(1f))
             Text(stepLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -193,7 +193,7 @@ fun HowToVerifyDialog(onDismiss: () -> Unit) {
         title = { Text("Check it yourself") },
         text = {
             Text(
-                "Open your phone's Settings › Apps › Expense Tracker › Permissions (or \"App info\").\n\n" +
+                "Open your phone's Settings › Apps › Kharcha › Permissions (or \"App info\").\n\n" +
                     "You'll see there is no network or internet access listed. Android enforces this, " +
                     "so the app physically cannot send your data anywhere.\n\n" +
                     "You can also turn on Airplane mode: everything keeps working."

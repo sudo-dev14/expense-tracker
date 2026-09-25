@@ -1,6 +1,6 @@
-# Expense Tracker (Android)
+# Kharcha (Android)
 
-An offline expense tracker that builds your spending history from payment messages on your phone.
+*Know where it went.* Kharcha is an offline expense tracker that builds your spending history from payment messages on your phone.
 
 > **Your data never leaves your phone.** The app declares no internet permission, so Android itself
 > blocks it from going online. There's no account, cloud backup, analytics or ads. CI fails the build if

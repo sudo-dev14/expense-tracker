@@ -10,7 +10,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.expensetracker.app"
+        applicationId = "app.kharcha"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -47,6 +47,7 @@ dependencies {
     implementation("com.expensetracker:core")
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

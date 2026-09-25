@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.ui.AppRoot
 import com.expensetracker.app.ui.theme.ExpenseTheme
@@ -14,6 +15,8 @@ class MainActivity : ComponentActivity() {
     private val container get() = (application as ExpenseApp).container
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Must run before super.onCreate: shows the Kharcha splash, then switches to the app theme.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {

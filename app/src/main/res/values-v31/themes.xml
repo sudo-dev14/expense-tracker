@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Kharcha" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-    </style>
-
-    <!-- Shown by the system while the app starts; swapped for Theme.Kharcha in MainActivity. -->
+    <!-- Android 12+ can also show a branding image at the bottom of the splash screen. -->
     <style name="Theme.Kharcha.Starting" parent="Theme.SplashScreen.IconBackground">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/brand_amber</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/splash_branding</item>
         <item name="postSplashScreenTheme">@style/Theme.Kharcha</item>
     </style>
 </resources>

@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Rupee coin with a small lock: money, kept private. -->
+<!-- Kharcha mark: a rupee coin. Used for the launcher icon (on amber) and the splash screen. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- coin rim -->
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4.5"
+        android:pathData="M54,27a27,27 0,1 1,0 54a27,27 0,1 1,0 -54z" />
+    <!-- milled edge -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M72.10,54.00a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM70.95,60.50a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM67.65,66.21a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM62.60,70.45a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM56.40,72.71a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM49.80,72.71a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM43.60,70.45a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM38.55,66.21a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM35.25,60.50a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM34.10,54.00a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM35.25,47.50a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM38.55,41.79a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM43.60,37.55a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM49.80,35.29a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM56.40,35.29a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM62.60,37.55a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM67.65,41.79a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0zM70.95,47.50a0.9,0.9 0,1 0,1.8 0a0.9,0.9 0,1 0,-1.8 0z" />
+    <!-- rupee sign -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
         android:strokeWidth="4"
-        android:pathData="M54,30a24,24 0,1 1,0 48a24,24 0,1 1,0 -48z" />
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="3.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M45,43h18M45,50h18M47,43c9,0 11,7 0,11l12,12" />
+        android:pathData="M45,45h18M45,51h18M48.5,45c8.5,0 10,6 0,11l11,11" />
 </vector>
