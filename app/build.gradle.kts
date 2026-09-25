@@ -10,7 +10,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "app.kharcha"
+        applicationId = "com.dev40.kharcha"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
