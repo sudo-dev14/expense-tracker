@@ -13,7 +13,10 @@ plugins {
 val keystoreProperties = Properties().apply {
     rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
-fun signingValue(name: String): String? = System.getenv(name) ?: keystoreProperties.getProperty(name)
+// Trimmed: secrets pasted into GitHub often pick up a trailing line break, which would make an
+// otherwise correct password fail.
+fun signingValue(name: String): String? =
+    (System.getenv(name) ?: keystoreProperties.getProperty(name))?.trim()?.takeIf { it.isNotEmpty() }
 
 android {
     namespace = "com.expensetracker.app"
