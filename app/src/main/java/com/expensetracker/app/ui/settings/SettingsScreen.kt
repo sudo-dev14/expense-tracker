@@ -1,9 +1,6 @@
 package com.expensetracker.app.ui.settings
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -21,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -83,7 +84,8 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
     var confirmDelete by remember { mutableStateOf(false) }
     var showHowTo by remember { mutableStateOf(false) }
     val trackingOn = autoTracking && hasPermission
-    val language = remember { LanguageManager.current(context) }
+    val language by LanguageManager.language(context).collectAsStateWithLifecycle()
+    var showLanguagePicker by remember { mutableStateOf(false) }
     val smsDeniedMessage = stringResource(R.string.set_sms_denied)
     val openLabel = stringResource(R.string.set_open)
 
@@ -181,16 +183,9 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
             Spacer(Modifier.height(20.dp))
             SectionLabel(stringResource(R.string.set_language))
             Spacer(Modifier.height(8.dp))
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                AppLanguage.entries.forEachIndexed { i, lang ->
-                    SegmentedButton(
-                        selected = language == lang,
-                        onClick = {
-                            if (lang != language) context.findActivity()?.let { LanguageManager.set(it, lang) }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(i, AppLanguage.entries.size),
-                    ) { Text(stringResource(lang.labelRes)) }
-                }
+            // A row plus a picker, not segmented buttons: "फ़ोन की भाषा" doesn't fit in a three-way row.
+            AppCard(padding = 0.dp) {
+                NavRow(stringResource(language.labelRes), stringResource(R.string.set_language_change)) { showLanguagePicker = true }
             }
 
             Spacer(Modifier.height(28.dp))
@@ -205,6 +200,36 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
     }
 
     if (showHowTo) HowToVerifyDialog(onDismiss = { showHowTo = false })
+
+    if (showLanguagePicker) {
+        AlertDialog(
+            onDismissRequest = { showLanguagePicker = false },
+            title = { Text(stringResource(R.string.set_language)) },
+            text = {
+                Column {
+                    AppLanguage.entries.forEach { lang ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .selectable(selected = lang == language, role = Role.RadioButton) {
+                                    showLanguagePicker = false
+                                    if (lang != language) LanguageManager.set(context, lang)
+                                }
+                                .padding(vertical = 12.dp, horizontal = 4.dp),
+                        ) {
+                            RadioButton(selected = lang == language, onClick = null)
+                            Spacer(Modifier.width(12.dp))
+                            Text(stringResource(lang.labelRes), style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { showLanguagePicker = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
 
     if (confirmDelete) {
         AlertDialog(
@@ -287,8 +312,3 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}

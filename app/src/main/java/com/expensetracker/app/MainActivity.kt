@@ -1,6 +1,7 @@
 package com.expensetracker.app
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.ui.AppRoot
+import com.expensetracker.app.ui.LocalizedContent
 import com.expensetracker.app.ui.theme.ExpenseTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,10 +28,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val themeMode by container.prefs.themeMode.collectAsStateWithLifecycle()
-            ExpenseTheme(themeMode) {
-                AppRoot(container)
+            val language by LanguageManager.language(this).collectAsStateWithLifecycle()
+            LocalizedContent(language) {
+                ExpenseTheme(themeMode) {
+                    AppRoot(container)
+                }
             }
         }
+    }
+
+    // The manifest routes locale changes here instead of recreating the activity, so switching
+    // language just redraws the text in place.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        LanguageManager.refresh(this)
     }
 
     override fun onResume() {

@@ -52,6 +52,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
@@ -59,6 +63,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
@@ -108,7 +113,8 @@ data class EditState(
 }
 
 class EditTransactionViewModel(private val container: AppContainer, private val id: Long) : ViewModel() {
-    private val _state = MutableStateFlow(EditState())
+    // A new entry has nothing to load, so it's ready on the very first frame.
+    private val _state = MutableStateFlow(EditState(loaded = id == NEW_TRANSACTION))
     val state: StateFlow<EditState> = _state.asStateFlow()
 
     init {
@@ -200,6 +206,16 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
             target != SheetValue.Hidden || draggedFarEnoughToClose(sheetState, restOffsetPx, sheetHeightPx)
         },
     )
+    // A fling that reaches the top of the form would otherwise carry on into the sheet, pulling it
+    // down and snapping it back. Deliberate drags from the top still move the sheet.
+    val keepFlingsInForm = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+                if (source == NestedScrollSource.SideEffect) available else Offset.Zero
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
+        }
+    }
     // Remember where the sheet rests when fully open, so a drag can be measured from there.
     LaunchedEffect(sheetState, sheetHeightPx) {
         restOffsetPx = Float.NaN
@@ -212,11 +228,15 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
     var showSms by remember { mutableStateOf(true) }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    // Open the sheet only once its content is ready, so it slides up once at full height
+    // instead of opening nearly empty and then jumping.
+    if (!state.loaded) return
+
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface) {
-        if (!state.loaded) return@ModalBottomSheet
         Column(
             Modifier
                 .onSizeChanged { sheetHeightPx = it.height.toFloat() }
+                .nestedScroll(keepFlingsInForm)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .navigationBarsPadding()

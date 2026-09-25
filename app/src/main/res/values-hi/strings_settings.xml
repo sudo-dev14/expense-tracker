@@ -19,6 +19,7 @@
     <string name="set_scan_again">सारे मैसेज फिर से देखें</string>
     <string name="set_appearance">दिखावट</string>
     <string name="set_language">भाषा</string>
+    <string name="set_language_change">बदलने के लिए टैप करें</string>
     <string name="set_delete_all">इस फ़ोन से सारा डेटा मिटाएँ</string>
     <string name="set_delete_title">सब कुछ मिटाएँ?</string>
     <string name="set_delete_text">सारे लेन-देन, श्रेणियाँ और सेटिंग्स इस फ़ोन से मिट जाएँगी। इसे वापस नहीं लाया जा सकेगा।</string>

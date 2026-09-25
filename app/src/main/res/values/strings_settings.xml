@@ -20,6 +20,7 @@
     <string name="set_scan_again">Scan all messages again</string>
     <string name="set_appearance">Appearance</string>
     <string name="set_language">Language</string>
+    <string name="set_language_change">Tap to change</string>
     <string name="set_delete_all">Delete all data from this phone</string>
     <string name="set_delete_title">Delete everything?</string>
     <string name="set_delete_text">All transactions, categories and settings will be erased from this phone. This can\'t be undone.</string>
