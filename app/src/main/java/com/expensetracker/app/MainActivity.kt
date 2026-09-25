@@ -1,5 +1,6 @@
 package com.expensetracker.app
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,10 @@ import com.expensetracker.app.ui.theme.ExpenseTheme
 class MainActivity : ComponentActivity() {
 
     private val container get() = (application as ExpenseApp).container
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LanguageManager.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Must run before super.onCreate: shows the Kharcha splash, then switches to the app theme.

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cat_food">खाना-पीना</string>
+    <string name="cat_groceries">राशन-किराना</string>
+    <string name="cat_shopping">ख़रीदारी</string>
+    <string name="cat_transport">आना-जाना</string>
+    <string name="cat_fuel">पेट्रोल-डीज़ल</string>
+    <string name="cat_bills">बिल और सेवाएँ</string>
+    <string name="cat_entertainment">मनोरंजन</string>
+    <string name="cat_health">सेहत</string>
+    <string name="cat_travel">यात्रा</string>
+    <string name="cat_transfers">ट्रांसफ़र</string>
+    <string name="cat_income">आमदनी</string>
+    <string name="cat_other">अन्य</string>
+
+    <string name="channel_upi">UPI</string>
+    <string name="channel_card">कार्ड</string>
+    <string name="channel_net_banking">नेट बैंकिंग</string>
+    <string name="channel_atm">ATM</string>
+    <string name="channel_wallet">वॉलेट</string>
+    <string name="channel_auto_debit">ऑटो-पे</string>
+    <string name="channel_other">अन्य</string>
+
+    <string name="range_this_month">इस महीने</string>
+    <string name="range_3m">3 महीने</string>
+    <string name="range_6m">6 महीने</string>
+    <string name="range_1y">1 साल</string>
+    <string name="range_3y">3 साल</string>
+    <string name="range_all">सब</string>
+    <string name="range_custom">तारीख़ चुनें</string>
+
+    <string name="theme_system">सिस्टम</string>
+    <string name="theme_light">लाइट</string>
+    <string name="theme_dark">डार्क</string>
+
+    <string name="lang_system">फ़ोन की भाषा</string>
+
+    <string name="action_cancel">रद्द करें</string>
+    <string name="action_delete">मिटाएँ</string>
+    <string name="action_save">सेव करें</string>
+    <string name="action_back">वापस</string>
+    <string name="action_done">हो गया</string>
+    <string name="action_undo">वापस लें</string>
+    <string name="action_close">बंद करें</string>
+    <string name="action_ok">ठीक है</string>
+</resources>
