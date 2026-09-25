@@ -159,8 +159,8 @@ fun RangeChips(
                 label = { Text(label) },
                 shape = RoundedCornerShape(18.dp),
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.onSurface,
-                    selectedLabelColor = MaterialTheme.colorScheme.surface,
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             )
         }

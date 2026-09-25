@@ -31,6 +31,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -140,11 +142,15 @@ private fun SummaryCard(state: HomeUiState) {
             .padding(horizontal = 20.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.inverseSurface)
+            .background(MaterialTheme.colorScheme.primaryContainer)
             .padding(22.dp),
     ) {
-        val onHero = MaterialTheme.colorScheme.inverseOnSurface
-        Text(title, color = onHero.copy(alpha = 0.75f), style = MaterialTheme.typography.bodyMedium)
+        // Sage teal card: dark text for the amount, teal-tinted labels, darker amber for "up"
+        // so it stays readable on the light card.
+        val onHero = MaterialTheme.colorScheme.onSurface
+        val heroMuted = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+        val upColor = if (MaterialTheme.colorScheme.background.luminance() > 0.5f) Color(0xFFA5620F) else MaterialTheme.colorScheme.tertiary
+        Text(title, color = heroMuted, style = MaterialTheme.typography.bodyMedium)
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(Money.format(state.summary.spentMinor), style = AmountStyle, fontSize = 40.sp, color = onHero)
             state.changePercent?.let { change ->
@@ -158,31 +164,31 @@ private fun SummaryCard(state: HomeUiState) {
                     Icon(
                         if (up) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
                         contentDescription = null,
-                        tint = if (up) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.inversePrimary,
+                        tint = if (up) upColor else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp),
                     )
                     Text(
                         "${abs(change)}% ${state.comparisonLabel}",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (up) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.inversePrimary,
+                        color = if (up) upColor else MaterialTheme.colorScheme.primary,
                     )
                 }
             }
         }
-        HorizontalDivider(Modifier.padding(vertical = 14.dp), color = onHero.copy(alpha = 0.15f))
+        HorizontalDivider(Modifier.padding(vertical = 14.dp), color = onHero.copy(alpha = 0.12f))
         Row {
             Column(Modifier.weight(1f)) {
-                Text("Income", fontSize = 12.sp, color = onHero.copy(alpha = 0.75f))
+                Text("Income", fontSize = 12.sp, color = heroMuted)
                 Text(Money.format(state.summary.incomeMinor), fontWeight = FontWeight.Bold, fontSize = 17.sp, color = onHero)
             }
             Column(Modifier.weight(1f)) {
-                Text(if (state.summary.netMinor >= 0) "Net saved" else "Net overspent", fontSize = 12.sp, color = onHero.copy(alpha = 0.75f))
+                Text(if (state.summary.netMinor >= 0) "Net saved" else "Net overspent", fontSize = 12.sp, color = heroMuted)
                 Text(
                     Money.format(state.summary.netMinor, signed = true),
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
-                    color = if (state.summary.netMinor >= 0) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.tertiary,
+                    color = if (state.summary.netMinor >= 0) MaterialTheme.colorScheme.primary else upColor,
                 )
             }
         }
