@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Kharcha mark: a rupee inside a "spend ring". Launcher icon (on teal) and splash screen.
-     ₹ outline from DejaVu Sans Bold (Bitstream Vera licence), so no font file ships. -->
+<!-- Single-colour Kharcha mark for Android 13+ themed icons (the system tints it). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -8,23 +7,23 @@
     android:viewportHeight="108">
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#FFF5F4EF"
+        android:strokeColor="#FFFFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M57.48,29.24A25,25 0,0 1,66.50,75.65" />
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#FF8FD3C4"
+        android:strokeColor="#FFFFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M57.48,78.76A25,25 0,0 1,29.24,57.48" />
     <path
         android:fillColor="#00000000"
-        android:strokeColor="#FFD08A2E"
+        android:strokeColor="#FFFFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M29.74,47.95A25,25 0,0 1,47.11,29.97" />
     <path
-        android:fillColor="#FFF5F4EF"
+        android:fillColor="#FFFFFFFF"
         android:pathData="M43.77 44.77 45.24 41.5H64.23L62.79 44.77H57.5Q58.04 45.7 58.24 46.94H64.23L62.79 50.21H58.15Q57.87 51.5 57.15 52.47Q55.94 54.06 53.53 54.81Q54.85 55.11 55.91 56.19Q56.96 57.26 58.02 59.4L61.52 66.5H54.65L51.61 60.29Q50.68 58.41 49.74 57.73Q48.79 57.04 47.22 57.04H44.71V52.59H48.11Q50.13 52.59 51.02 51.46Q51.45 50.91 51.67 50.21H43.77L45.24 46.94H51.62Q51.4 46.32 51.02 45.84Q50.13 44.77 48.11 44.77Z" />
 </vector>
