@@ -59,7 +59,23 @@ jobs:
             STOREPASS="$(printf '%s' "$KHARCHA_KEYSTORE_PASSWORD" | tr -d '\r\n')"
             if keytool -list -keystore "$KHARCHA_KEYSTORE_FILE" -storepass "$STOREPASS" > "$RUNNER_TEMP/keytool.txt" 2>&1; then
               echo "Keystore password opens the keystore."
-              grep -iE "alias name|keystore type|PrivateKeyEntry" "$RUNNER_TEMP/keytool.txt" || true
+              # If the alias secret doesn't name a key here but the keystore holds exactly one key,
+              # sign with that key (a mistyped alias secret is easy to make and hard to see).
+              ALIAS="$(printf '%s' "$KHARCHA_KEY_ALIAS" | tr -d '\r\n' | sed 's/^[[:space:]"'"'"']*//; s/[[:space:]"'"'"']*$//')"
+              KEYS="$(grep -i "PrivateKeyEntry" "$RUNNER_TEMP/keytool.txt" | cut -d, -f1)"
+              if ! printf '%s\n' "$KEYS" | grep -qixF -- "$ALIAS"; then
+                if [ "$(printf '%s\n' "$KEYS" | grep -c .)" = "1" ]; then
+                  echo "::warning::KHARCHA_KEY_ALIAS doesn't match the key in the keystore; using the keystore's only key, '$KEYS'. Update the secret to that name."
+                  ALIAS="$KEYS"
+                else
+                  echo "::error::KHARCHA_KEY_ALIAS doesn't match any key. Keys in this keystore: $(printf '%s' "$KEYS" | tr '\n' ' ')"
+                fi
+              fi
+              export KHARCHA_KEY_ALIAS="$ALIAS"
+              # PKCS12 keystores (the default today) use the keystore password for the key as well.
+              if grep -qi "keystore type: PKCS12" "$RUNNER_TEMP/keytool.txt"; then
+                export KHARCHA_KEY_PASSWORD="$STOREPASS"
+              fi
             else
               echo "::error::KHARCHA_KEYSTORE_PASSWORD doesn't open this keystore, or KHARCHA_KEYSTORE_BASE64 isn't a complete copy of it."
               grep -vi "password" "$RUNNER_TEMP/keytool.txt" | head -5 || true
