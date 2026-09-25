@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,10 +59,14 @@ const val NEW_TRANSACTION = -1L
 @Composable
 fun AppRoot(container: AppContainer) {
     val onboardingDone by container.prefs.onboardingDone.collectAsStateWithLifecycle()
-    if (!onboardingDone) {
-        OnboardingFlow(container, onFinished = { container.prefs.setOnboardingDone(true) })
-    } else {
-        MainScaffold(container)
+    // Sets the default text/icon colour for the theme. Without it, screens outside the
+    // Scaffold (onboarding) fall back to black text, which is unreadable in dark mode.
+    Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
+        if (!onboardingDone) {
+            OnboardingFlow(container, onFinished = { container.prefs.setOnboardingDone(true) })
+        } else {
+            MainScaffold(container)
+        }
     }
 }
 
