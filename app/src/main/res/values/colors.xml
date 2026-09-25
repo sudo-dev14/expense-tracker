@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="window_background">#F5F4EF</color>
-    <color name="brand_amber">#D08A2E</color>
+    <color name="brand_teal">#0E5A52</color>
     <color name="splash_background">#F5F4EF</color>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Kharcha mark: a rupee coin. Used for the launcher icon (on amber) and the splash screen. -->
+<!-- Kharcha mark: a rupee coin. Used for the launcher icon (on teal) and the splash screen. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
