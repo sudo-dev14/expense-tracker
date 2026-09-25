@@ -1,9 +1,19 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+// Release signing comes from environment variables (CI secrets) or, for local builds, from a
+// keystore.properties file next to settings.gradle.kts. Neither the keystore nor its passwords
+// are ever committed. Without them, release builds are simply unsigned.
+val keystoreProperties = Properties().apply {
+    rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+fun signingValue(name: String): String? = System.getenv(name) ?: keystoreProperties.getProperty(name)
 
 android {
     namespace = "com.expensetracker.app"
@@ -13,12 +23,26 @@ android {
         applicationId = "com.dev40.kharcha"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
+        // CI passes an increasing number for Play uploads; local builds use 1.
+        versionCode = System.getenv("KHARCHA_VERSION_CODE")?.toIntOrNull() ?: 1
         versionName = "0.1.0"
+    }
+
+    signingConfigs {
+        val storePath = signingValue("KHARCHA_KEYSTORE_FILE")
+        if (storePath != null) {
+            create("release") {
+                storeFile = file(storePath)
+                storePassword = signingValue("KHARCHA_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("KHARCHA_KEY_ALIAS")
+                keyPassword = signingValue("KHARCHA_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
