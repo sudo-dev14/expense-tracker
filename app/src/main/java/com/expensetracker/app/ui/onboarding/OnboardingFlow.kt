@@ -164,10 +164,10 @@ private fun PrivacyPromise(onContinue: () -> Unit) {
             Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
         }
         Spacer(Modifier.height(28.dp))
-        Text("Everything stays on your phone.", style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp))
+        Text("Your messages stay on your phone.", style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp))
         Spacer(Modifier.height(14.dp))
         Text(
-            "Your messages are read and sorted right here on this device. Nothing is ever uploaded.",
+            "Everything is read, stored and calculated on this device. Nothing is ever uploaded.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
