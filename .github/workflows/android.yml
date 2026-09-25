@@ -1,0 +1,45 @@
+name: Android CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Core unit tests (SMS parser, analytics)
+        run: ./gradlew -p core test --console=plain
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --console=plain
+
+      - name: Verify the APK requests no network permission
+        run: |
+          AAPT2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 | sort -V | tail -1)
+          "$AAPT2" dump permissions app/build/outputs/apk/debug/app-debug.apk | tee permissions.txt
+          if grep -Eq "android.permission.(INTERNET|ACCESS_NETWORK_STATE|ACCESS_WIFI_STATE)" permissions.txt; then
+            echo "::error::The APK requests a network permission. The app must stay offline."
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-reports
+          path: core/build/reports/tests/
