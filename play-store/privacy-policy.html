@@ -1,0 +1,227 @@
+<title>Kharcha Privacy Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Manrope:wght@400;600;700&family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #F5F4EF;
+    --paper: #FFFFFF;
+    --ink: #17191A;
+    --muted: #4F5656;
+    --line: #E3E1D9;
+    --teal: #0E5A52;
+    --sage: #E1EEEB;
+    --on-sage: #0A3F3A;
+    --amber: #B06F1C;
+    --display: "Fraunces", Georgia, "Times New Roman", serif;
+    --body: "Manrope", "Mukta", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --hindi: "Mukta", "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #121414;
+      --paper: #1B1E1E;
+      --ink: #ECEDEA;
+      --muted: #A9AFAE;
+      --line: #2E3333;
+      --teal: #7FCBBC;
+      --sage: #1D4A43;
+      --on-sage: #CDEBE4;
+      --amber: #F2B766;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #121414;
+    --paper: #1B1E1E;
+    --ink: #ECEDEA;
+    --muted: #A9AFAE;
+    --line: #2E3333;
+    --teal: #7FCBBC;
+    --sage: #1D4A43;
+    --on-sage: #CDEBE4;
+    --amber: #F2B766;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 16px/1.65 var(--body);
+    padding-inline: 20px;
+    padding-block: 40px 64px;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; }
+
+  header { display: flex; flex-direction: column; gap: 14px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand svg { width: 44px; height: 44px; flex-shrink: 0; }
+  .brand span { font: 600 20px/1 var(--display); }
+  h1 { margin: 0; font: 600 clamp(30px, 6vw, 42px)/1.12 var(--display); letter-spacing: -0.01em; text-wrap: balance; }
+  .meta { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .lang { display: flex; gap: 8px; flex-wrap: wrap; }
+  .lang a {
+    display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 18px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    font-weight: 600; font-size: 14px; text-decoration: none;
+  }
+  .lang a:hover { border-color: var(--teal); }
+  .lang a:focus-visible, a:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+  .promise {
+    background: var(--sage); color: var(--on-sage); border-radius: 20px; padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .promise strong { font: 600 22px/1.3 var(--display); color: var(--on-sage); text-wrap: balance; }
+  .promise p { margin: 0; }
+
+  section { display: flex; flex-direction: column; gap: 12px; }
+  h2 { margin: 12px 0 0; font: 700 13px/1.4 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
+  .part { display: flex; flex-direction: column; gap: 22px; }
+  h3 { margin: 0; font: 600 20px/1.35 var(--display); text-wrap: balance; }
+  p { margin: 0; }
+  .block { display: flex; flex-direction: column; gap: 8px; }
+  ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+  .perm { border: 1px solid var(--line); background: var(--paper); border-radius: 16px; overflow: hidden; }
+  .perm div { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 4px 16px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .perm div:first-child { border-top: 0; }
+  .perm code { font: 600 13px/1.5 ui-monospace, "SFMono-Regular", Menlo, monospace; color: var(--ink); overflow-wrap: anywhere; }
+  .perm .no code { color: var(--amber); }
+  @media (max-width: 480px) { .perm div { grid-template-columns: 1fr; } }
+
+  hr { border: 0; border-top: 1px solid var(--line); margin: 8px 0 0; width: 100%; }
+  [lang="hi"] { font-family: var(--hindi); line-height: 1.75; }
+  [lang="hi"] h3 { font-family: var(--hindi); font-weight: 700; }
+  footer { color: var(--muted); font-size: 14px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 108 108" aria-hidden="true">
+        <rect width="108" height="108" rx="30" fill="#0E5A52"></rect>
+        <g fill="none" stroke-linecap="round" stroke-width="12">
+          <path d="M59.2 16.7A37.5 37.5 0 0 1 72.8 86.5" stroke="#F5F4EF"></path>
+          <path d="M59.2 91.3A37.5 37.5 0 0 1 16.9 59.2" stroke="#8FD3C4"></path>
+          <path d="M16.9 48.8A37.5 37.5 0 0 1 41.2 18.8" stroke="#D08A2E"></path>
+        </g>
+        <text x="54" y="68" text-anchor="middle" font-family="Manrope, Arial, sans-serif" font-weight="700" font-size="40" fill="#F5F4EF">₹</text>
+      </svg>
+      <span>Kharcha</span>
+    </div>
+    <h1>Privacy policy</h1>
+    <p class="meta">Effective 25 September 2026 · Applies to the Kharcha Android app (com.dev40.kharcha)</p>
+    <nav class="lang" aria-label="Language">
+      <a href="#en">English</a>
+      <a href="#hi" lang="hi">हिन्दी</a>
+    </nav>
+  </header>
+
+  <div class="promise">
+    <strong>Kharcha works entirely on your phone. It has no internet access, so nothing you store in it can be sent anywhere.</strong>
+    <p>We don't collect, receive, sell or share any of your data.</p>
+  </div>
+
+  <section id="en" class="part">
+    <h2>English</h2>
+
+    <div class="block">
+      <h3>What the app reads</h3>
+      <p>If you turn on auto-tracking, Kharcha reads the text messages on your phone to find payment messages, such as a note that an amount was paid or received. From those messages it keeps the amount, date, payee, account ending digits and category, plus the original message text so you can check it later.</p>
+      <p>Other messages, including one-time passwords, promotions and personal chats, are skipped and not stored. You can use Kharcha without this permission and add expenses by hand instead.</p>
+    </div>
+
+    <div class="block">
+      <h3>Where your data is kept</h3>
+      <ul>
+        <li>Everything is stored in the app's private storage on your phone. Other apps can't read it.</li>
+        <li>The app declares no internet permission, so Android itself blocks it from going online.</li>
+        <li>Kharcha has no account, sign-in, cloud sync, ads, analytics or crash reporting.</li>
+        <li>Android backup is turned off for the app, so its data is not copied to a cloud backup.</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>Permissions</h3>
+      <div class="perm">
+        <div><code>READ_SMS</code><span>Reads existing payment messages once you turn on auto-tracking.</span></div>
+        <div><code>RECEIVE_SMS</code><span>Adds new payment messages as they arrive.</span></div>
+        <div class="no"><code>INTERNET</code><span>Not requested. The app can't connect to any network.</span></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Reports you share</h3>
+      <p>You can export a PDF report. It is created on your phone, and it leaves the phone only if you choose to save it somewhere or share it with another app. What happens to it after that is covered by that app's own policy.</p>
+    </div>
+
+    <div class="block">
+      <h3>Deleting your data</h3>
+      <p>Use Settings › Delete all data from this phone to erase every transaction, rule and setting. Uninstalling the app also removes all of its data. Because we never receive your data, there is nothing for us to delete on our side.</p>
+    </div>
+
+    <div class="block">
+      <h3>Children</h3>
+      <p>Kharcha is meant for adults managing their own spending and is not directed at children under 13.</p>
+    </div>
+
+    <div class="block">
+      <h3>Changes and contact</h3>
+      <p>If this policy changes, the new version will be posted on this page with a new effective date. For questions, use the developer contact email shown on Kharcha's Google Play page.</p>
+    </div>
+  </section>
+
+  <hr>
+
+  <section id="hi" class="part" lang="hi">
+    <h2>हिन्दी</h2>
+
+    <div class="block">
+      <h3>ऐप क्या पढ़ता है</h3>
+      <p>अगर आप ऑटो-ट्रैकिंग चालू करते हैं, तो खर्चा आपके फ़ोन के मैसेज पढ़कर पेमेंट वाले मैसेज ढूँढता है, जैसे किसी रक़म के भेजे या मिलने की सूचना। इन मैसेज से वह रक़म, तारीख़, किसे दिया, खाते के आख़िरी अंक और श्रेणी रखता है, और असली मैसेज भी, ताकि आप बाद में उसे जाँच सकें।</p>
+      <p>बाक़ी मैसेज, जैसे OTP, ऑफ़र और निजी बातचीत, छोड़ दिए जाते हैं और सेव नहीं होते। आप यह अनुमति दिए बिना भी खर्चा इस्तेमाल कर सकते हैं और ख़र्च ख़ुद जोड़ सकते हैं।</p>
+    </div>
+
+    <div class="block">
+      <h3>आपका डेटा कहाँ रहता है</h3>
+      <ul>
+        <li>सब कुछ आपके फ़ोन में ऐप की निजी जगह में रहता है। दूसरे ऐप इसे नहीं पढ़ सकते।</li>
+        <li>ऐप इंटरनेट की अनुमति नहीं माँगता, इसलिए Android ख़ुद इसे ऑनलाइन जाने से रोकता है।</li>
+        <li>खर्चा में कोई अकाउंट, लॉग-इन, क्लाउड सिंक, विज्ञापन, एनालिटिक्स या क्रैश रिपोर्टिंग नहीं है।</li>
+        <li>ऐप के लिए Android बैकअप बंद है, इसलिए इसका डेटा किसी क्लाउड बैकअप में नहीं जाता।</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>अनुमतियाँ</h3>
+      <div class="perm">
+        <div><code>READ_SMS</code><span>ऑटो-ट्रैकिंग चालू करने पर पुराने पेमेंट मैसेज पढ़ता है।</span></div>
+        <div><code>RECEIVE_SMS</code><span>नए पेमेंट मैसेज आते ही जोड़ता है।</span></div>
+        <div class="no"><code>INTERNET</code><span>नहीं माँगी गई। ऐप किसी नेटवर्क से नहीं जुड़ सकता।</span></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>रिपोर्ट जो आप शेयर करते हैं</h3>
+      <p>आप PDF रिपोर्ट बना सकते हैं। यह आपके फ़ोन पर ही बनती है और फ़ोन से बाहर तभी जाती है जब आप इसे कहीं सेव करें या किसी दूसरे ऐप से शेयर करें। उसके बाद उस ऐप की अपनी नीति लागू होती है।</p>
+    </div>
+
+    <div class="block">
+      <h3>अपना डेटा मिटाना</h3>
+      <p>सेटिंग्स › इस फ़ोन से सारा डेटा मिटाएँ से हर लेन-देन, नियम और सेटिंग मिट जाती है। ऐप अनइंस्टॉल करने पर भी उसका सारा डेटा हट जाता है। हमें आपका डेटा कभी मिलता ही नहीं, इसलिए हमारी तरफ़ मिटाने को कुछ नहीं है।</p>
+    </div>
+
+    <div class="block">
+      <h3>बच्चे</h3>
+      <p>खर्चा बड़ों के लिए है जो अपना ख़र्च ख़ुद सँभालते हैं। यह 13 साल से कम उम्र के बच्चों के लिए नहीं बना है।</p>
+    </div>
+
+    <div class="block">
+      <h3>बदलाव और संपर्क</h3>
+      <p>अगर यह नीति बदलती है, तो नया रूप नई तारीख़ के साथ इसी पेज पर डाला जाएगा। सवालों के लिए Google Play पर खर्चा के पेज पर दिया गया डेवलपर ईमेल इस्तेमाल करें।</p>
+    </div>
+  </section>
+
+  <footer>Kharcha · Made in India · Works offline</footer>
+</div>
