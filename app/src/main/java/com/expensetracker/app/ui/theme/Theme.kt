@@ -90,12 +90,20 @@ private val AppTypography = Typography().run {
 
 val AmountStyle = TextStyle(fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold)
 
+/**
+ * Whether this mode paints dark. Public because the window itself has to agree with Compose:
+ * the status-bar icons and the window background live outside the composition, and if they
+ * follow the system night setting instead of this preference they contradict the app's colours.
+ */
+@Composable
+fun ThemeMode.isDarkTheme(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+}
+
 @Composable
 fun ExpenseTheme(mode: ThemeMode, content: @Composable () -> Unit) {
-    val dark = when (mode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
+    val dark = mode.isDarkTheme()
     MaterialTheme(colorScheme = if (dark) Dark else Light, typography = AppTypography, content = content)
 }

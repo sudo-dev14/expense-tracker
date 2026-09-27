@@ -3,4 +3,12 @@
     <color name="window_background">#F5F4EF</color>
     <color name="brand_teal">#0E5A52</color>
     <color name="splash_background">#F5F4EF</color>
+
+    <!--
+      Deliberately NOT night-qualified. window_background above follows the system night
+      setting, which is only right for ThemeMode.SYSTEM; MainActivity picks between these
+      two explicitly so the window matches the user's Appearance preference instead.
+    -->
+    <color name="window_background_light">#F5F4EF</color>
+    <color name="window_background_dark">#121414</color>
 </resources>
