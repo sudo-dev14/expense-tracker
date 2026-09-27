@@ -7,11 +7,14 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.height
 import com.expensetracker.app.data.ThemeMode
 import com.expensetracker.app.ui.components.RangeChips
 import com.expensetracker.core.analytics.DateRange
 import com.expensetracker.core.analytics.RangePreset
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.robolectric.annotation.Config
 import java.time.LocalDate
 
 class RangeChipsTest : ScreenshotTest() {
@@ -93,6 +96,60 @@ class RangeChipsTest : ScreenshotTest() {
         }
 
         assertDp(4.dp, compose.onNodeWithText("This month").getUnclippedBoundsInRoot().left, "first chip left")
+    }
+
+    // ---- Large font scale -------------------------------------------------------------------
+    //
+    // The chips sit in a LazyRow, so at a large font scale they grow and push the later presets
+    // off-screen rather than wrapping. The horizontal rhythm must survive that.
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFontLight() = screenshot("RangeChips_fontScale2", ThemeMode.LIGHT) { Chips() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFontDark() = screenshot("RangeChips_fontScale2", ThemeMode.DARK) { Chips() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `at 2x the chips keep their 20dp inset and 8dp gaps`() {
+        setBareContent { Chips() }
+
+        val first = compose.onNodeWithText("This month").getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithText("3M").getUnclippedBoundsInRoot()
+        val third = compose.onNodeWithText("6M").getUnclippedBoundsInRoot()
+
+        assertDp(20.dp, first.left, "first chip left at 2x")
+        assertDp(8.dp, second.left - first.right, "gap between chip 1 and 2 at 2x")
+        assertDp(8.dp, third.left - second.right, "gap between chip 2 and 3 at 2x")
+    }
+
+    /**
+     * `FilterChip`'s 32dp default height is a minimum, not a cap: the chip must grow with its
+     * label rather than clipping it. If a future Material version starts enforcing a fixed
+     * height, this catches it.
+     */
+    @Test
+    fun `at 2x the chips grow taller than the 32dp default`() {
+        setBareContent { Chips() }
+
+        val first = compose.onNodeWithText("This month").getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithText("3M").getUnclippedBoundsInRoot()
+
+        assertTrue("chip height ${first.height} should exceed the 32dp default at 2x", first.height > 32.dp)
+        assertDp(first.height, second.height, "all chips share one height at 2x")
+    }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `at 2x the chips still sit on a single row`() {
+        setBareContent { Chips() }
+
+        val first = compose.onNodeWithText("This month").getUnclippedBoundsInRoot()
+        val third = compose.onNodeWithText("6M").getUnclippedBoundsInRoot()
+
+        assertDp(first.top, third.top, "chip top alignment at 2x")
     }
 
     private companion object {

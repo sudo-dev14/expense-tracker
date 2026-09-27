@@ -15,6 +15,7 @@ import com.expensetracker.app.data.ThemeMode
 import com.expensetracker.app.ui.components.TransactionRow
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.robolectric.annotation.Config
 
 class TransactionRowTest : ScreenshotTest() {
 
@@ -103,6 +104,64 @@ class TransactionRowTest : ScreenshotTest() {
 
         compose.onNodeWithText("−₹485.50", useUnmergedTree = true).assertIsDisplayed()
         compose.onNodeWithText("+₹75,000", useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    // ---- Large font scale -------------------------------------------------------------------
+    //
+    // Both texts in the middle column are maxLines = 1 + ellipsis, so at a large font scale they
+    // truncate rather than wrap. The goldens show how much of each label survives; the
+    // assertions below pin the thing that must not break — the amount staying put and readable.
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFontLight() = screenshot("TransactionRow_fontScale2", ThemeMode.LIGHT) { SampleRows() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFontDark() = screenshot("TransactionRow_fontScale2", ThemeMode.DARK) { SampleRows() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `at 2x the row grows instead of clipping its content`() {
+        setBareContent { TransactionRow(Fixtures.transaction(), onClick = {}, Modifier.testTag(ROW)) }
+
+        val row = compose.onNodeWithTag(ROW).getUnclippedBoundsInRoot()
+        val merchant = compose.onNodeWithText("Blue Tokai Coffee", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val subtitle = compose.onNodeWithText("Food & dining · HDFC ••4821 · UPI", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val tallest = maxOf(40.dp, subtitle.bottom - merchant.top)
+
+        // The same rule as at 1x — tallest child plus 10dp of padding above and below — but the
+        // text column is now the tallest child rather than the avatar.
+        assertDp(tallest + 20.dp, row.height, "row height at 2x")
+        assertTrue("row should be taller at 2x than the 60dp it measures at 1x", row.height > 60.dp)
+    }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `at 2x the amount stays flush right and the merchant name yields to it`() {
+        setBareContent { TransactionRow(Fixtures.transaction(), onClick = {}, Modifier.testTag(ROW)) }
+
+        val amount = compose.onNodeWithText("−₹485.50", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val merchant = compose.onNodeWithText("Blue Tokai Coffee", useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+        assertDp(rootWidth() - 20.dp, amount.right, "amount right edge at 2x")
+        assertTrue(
+            "merchant text (right=${merchant.right}) overlaps the amount (left=${amount.left}) at 2x",
+            merchant.right <= amount.left,
+        )
+    }
+
+    /** The avatar is a fixed 40dp, so the row's left-hand geometry must not move at 2x. */
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `at 2x the avatar and the merchant column keep their horizontal positions`() {
+        setBareContent { TransactionRow(Fixtures.transaction(), onClick = {}, Modifier.testTag(ROW)) }
+
+        val initials = compose.onNodeWithText("BT", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val merchant = compose.onNodeWithText("Blue Tokai Coffee", useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+        assertDp(40.dp, initials.left + initials.width / 2, "avatar centre at 2x")
+        assertDp(72.dp, merchant.left, "merchant text left at 2x")
     }
 
     private companion object {

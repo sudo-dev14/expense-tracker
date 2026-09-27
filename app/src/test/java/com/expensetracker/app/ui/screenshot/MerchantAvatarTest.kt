@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.width
 import com.expensetracker.app.data.ThemeMode
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.core.model.Category
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.robolectric.annotation.Config
 
@@ -85,25 +86,100 @@ class MerchantAvatarTest : ScreenshotTest() {
         }
     }
 
+    // ---- Large font scale -------------------------------------------------------------------
+    //
+    // MerchantAvatar sizes its text as (size.value * 0.33f).sp inside a *fixed* size box, so the
+    // glyphs grow with the user's font scale while their container does not.
+
     @Test
     @Config(fontScale = 2.0f)
-    fun `EXPLORE containment at 2x`() {
+    fun largeFontLight() = screenshot("MerchantAvatar_fontScale2", ThemeMode.LIGHT) { WideInitialsRow() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun largeFontDark() = screenshot("MerchantAvatar_fontScale2", ThemeMode.DARK) { WideInitialsRow() }
+
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `the square keeps its size at 2x, whatever the initials`() {
+        setBareContent {
+            Row {
+                Box(Modifier.testTag("bt")) { MerchantAvatar("Blue Tokai", Category.FOOD) }
+                Box(Modifier.testTag("ww")) { MerchantAvatar("Wonder World", Category.FOOD) }
+                Box(Modifier.testTag("big")) { MerchantAvatar("Wonder World", Category.FOOD, size = 56.dp) }
+            }
+        }
+
+        compose.onNodeWithTag("bt").assertWidthIsEqualTo(40.dp).assertHeightIsEqualTo(40.dp)
+        compose.onNodeWithTag("ww").assertWidthIsEqualTo(40.dp).assertHeightIsEqualTo(40.dp)
+        compose.onNodeWithTag("big").assertWidthIsEqualTo(56.dp).assertHeightIsEqualTo(56.dp)
+    }
+
+    /**
+     * The real invariant: however big the glyphs get, they are constrained by the avatar and
+     * never spill onto the neighbouring one. This is what stops a large font scale from turning
+     * a transaction list into overlapping text.
+     */
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `initials never escape the avatar at 2x`() {
+        setBareContent { Box(Modifier.testTag(AVATAR)) { MerchantAvatar("Wonder World", Category.FOOD) } }
+
+        val box = compose.onNodeWithTag(AVATAR).getUnclippedBoundsInRoot()
+        val text = compose.onNodeWithText("WW", useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+        assertTrue("initials left ${text.left} escapes box left ${box.left}", text.left >= box.left)
+        assertTrue("initials right ${text.right} escapes box right ${box.right}", text.right <= box.right)
+        assertTrue("initials top ${text.top} escapes box top ${box.top}", text.top >= box.top)
+        assertTrue("initials bottom ${text.bottom} escapes box bottom ${box.bottom}", text.bottom <= box.bottom)
+    }
+
+    /**
+     * KNOWN DEFECT, pinned deliberately. At 2x the widest initial pair ("WW") measures exactly
+     * the width of its 40dp container — it has saturated the box instead of being scaled down to
+     * fit. Compare "BT", which still has room to spare.
+     *
+     * The consequence is visible in `MerchantAvatar_fontScale2_light.png`: the pair no longer
+     * fits, and only the *first* letter survives. "Wonder World" renders as "W" and "Mega Mart"
+     * as "M", so at a large font scale two different merchants become indistinguishable. It is a
+     * silent loss of information, not merely an overflow.
+     *
+     * This is a characterisation test: it records what the component does today, not what it
+     * should do. When `MerchantAvatar` is fixed to clamp its font size (or to use `autoSize`),
+     * this test will fail — that failure is the signal to delete it, because
+     * `initials never escape the avatar at 2x` above will then be carrying the invariant on its
+     * own. The `MerchantAvatar_fontScale2` goldens show the clipping.
+     */
+    @Test
+    @Config(fontScale = 2.0f)
+    fun `widest initials saturate the avatar at 2x - known defect`() {
         setBareContent {
             Row {
                 Box(Modifier.testTag("bt")) { MerchantAvatar("Blue Tokai", Category.FOOD) }
                 Box(Modifier.testTag("ww")) { MerchantAvatar("Wonder World", Category.FOOD) }
             }
         }
-        listOf("bt" to "BT", "ww" to "WW").forEach { (tag, initials) ->
-            val box = compose.onNodeWithTag(tag).getUnclippedBoundsInRoot()
-            val text = compose.onNodeWithText(initials, useUnmergedTree = true).getUnclippedBoundsInRoot()
-            println("MEASURE $initials: box=${box.width}x${box.height} text=${text.width}x${text.height}")
-        }
+
+        val narrow = compose.onNodeWithText("BT", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val wide = compose.onNodeWithText("WW", useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+        assertDp(40.dp, wide.width, "\"WW\" has saturated the 40dp avatar")
+        assertTrue("\"BT\" (${narrow.width}) should still fit inside 40dp", narrow.width < 40.dp)
     }
 
     private companion object {
         const val AVATAR = "avatar"
     }
+}
+
+/** Initial pairs from the widest glyphs down to the narrowest, to show the clipping threshold. */
+@Composable
+private fun WideInitialsRow() = Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    MerchantAvatar("Wonder World", Category.FOOD)
+    MerchantAvatar("Mega Mart", Category.SHOPPING)
+    MerchantAvatar("Blue Tokai", Category.TRANSPORT)
+    MerchantAvatar("Indian Oil", Category.FUEL)
+    MerchantAvatar("", Category.OTHER)
 }
 
 @Composable
