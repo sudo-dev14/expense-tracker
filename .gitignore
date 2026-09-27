@@ -6,6 +6,11 @@ local.properties
 .DS_Store
 captures/
 .kotlin/
+
+# Roborazzi goldens. Recorded by the "Record screenshot goldens" CI job on Linux and force-added
+# there; never committed from a developer's machine, where FontFamily.Serif is a different system
+# font and every image would differ. Recording locally to look at the output is expected.
+app/src/test/screenshots/
 *.keystore
 *.jks
 keystore.properties

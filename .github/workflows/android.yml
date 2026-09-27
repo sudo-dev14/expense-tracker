@@ -169,13 +169,19 @@ jobs:
         run: ./gradlew :app:recordRoborazziDebug --console=plain
 
       - name: Commit any changed goldens
+        env:
+          # Via env rather than inline ${{ }}, so a branch name is never pasted into the shell.
+          BRANCH: ${{ github.ref_name }}
         run: |
-          if git diff --quiet -- app/src/test/screenshots; then
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # -f because the directory is gitignored: goldens belong to this job, not to a
+          # developer's machine. Staging first also means the comparison below sees the very
+          # first recording, which is untracked and so invisible to a plain `git diff`.
+          git add -f app/src/test/screenshots
+          if git diff --cached --quiet; then
             echo "Goldens are already up to date; nothing to commit."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/src/test/screenshots
           git commit -m "Record Roborazzi goldens on Linux CI"
-          git push origin HEAD:"${{ github.ref_name }}"
+          git push origin HEAD:"$BRANCH"
