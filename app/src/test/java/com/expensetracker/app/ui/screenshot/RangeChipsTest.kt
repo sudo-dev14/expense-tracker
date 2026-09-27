@@ -131,6 +131,7 @@ class RangeChipsTest : ScreenshotTest() {
      * height, this catches it.
      */
     @Test
+    @Config(fontScale = 2.0f)
     fun `at 2x the chips grow taller than the 32dp default`() {
         setBareContent { Chips() }
 

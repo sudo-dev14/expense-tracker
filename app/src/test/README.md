@@ -31,6 +31,48 @@ redesign, and it says nothing about why. So every component gets both:
    avatar plus a 12dp `Arrangement.spacedBy`. When one breaks, the message says which distance
    moved and by how much, which a diff image never does.
 
+## The font-scale matrix
+
+`MerchantAvatar`, `TransactionRow` and `RangeChips` are additionally covered at **`fontScale = 2.0f`**,
+because the design review found layout defects that only appear at large font scales.
+
+The mechanism is Robolectric's `@Config(fontScale = 2.0f)`, which this project's Robolectric
+(4.17) supports as a **per-test-method** annotation — no separate test class and no
+`RuntimeEnvironment.setFontScale` call needed. It sets `Configuration.fontScale`, which Compose
+reads into `LocalDensity`.
+
+`FontScaleHarnessTest` guards that plumbing: it asserts the scale Compose actually observes is
+1.0 by default and 2.0 under the annotation. Without it, a Robolectric upgrade that stopped
+propagating font scale would leave every large-font test below passing while silently rendering
+at 1x — testing nothing.
+
+What the 2x coverage pins down, measured rather than assumed:
+
+| | at 1x | at 2x |
+|---|---|---|
+| `TransactionRow` height | 60dp | 94dp — grows, does not clip |
+| `TransactionRow` amount right edge | 391dp | 391dp — still flush to the 20dp margin |
+| `RangeChips` chip height | 32dp | 37.5dp — grows with its label |
+| `RangeChips` inset / gaps | 20dp / 8dp | 20dp / 8dp — unchanged |
+| `MerchantAvatar` box | 40dp | 40dp — fixed |
+| `MerchantAvatar` "WW" text width | fits | **40dp — saturated** |
+
+The last row is a real defect and is deliberately pinned by
+`widest initials saturate the avatar at 2x - known defect`. `MerchantAvatar` sizes its text as
+`(size.value * 0.33f).sp` inside a fixed-size box, so the glyphs scale with the user's font
+setting but their container does not. In `MerchantAvatar_fontScale2_light.png` the pair no
+longer fits and **only the first letter survives** — "Wonder World" renders as "W", "Mega Mart"
+as "M" — so two different merchants become indistinguishable. That test is a *characterisation*
+test: it records today's behaviour, not the desired behaviour. When the component is fixed to
+clamp its font size, the test fails; that failure is the signal to delete it, because
+`initials never escape the avatar at 2x` then carries the invariant alone.
+
+`TransactionRow`'s truncation at 2x (both labels are `maxLines = 1` + ellipsis, so the subtitle
+degrades to "Food & dini…" and loses the account and channel) is visible in its 2x goldens. It
+is left as-is rather than asserted against, since single-line truncation is the component's
+stated intent; the assertions pin the part that must not break — the amount staying flush right
+and un-truncated, and the merchant column yielding to it rather than overlapping.
+
 ## Goldens are recorded on Linux CI, never on a developer machine
 
 `DisplayFamily = FontFamily.Serif` (`ui/theme/Theme.kt`) is a **system** font with no bundled
@@ -42,13 +84,19 @@ re-records on Linux and commits the PNGs back to the branch. Review them in the 
 other file.
 
 Running `recordRoborazziDebug` locally is still useful — it is how you see what a new test
-captures — but **do not commit what it produces**. If `app/src/test/screenshots/` is empty, CI
+captures — but **do not commit what it produces**. `app/src/test/screenshots/` is gitignored so
+that this cannot happen by accident; the recording job force-adds the directory, which is the
+only path by which goldens enter the repository. If that directory is empty, CI
 records instead of comparing and emits a warning rather than failing, so a branch that adds a
 component is never red for the sole reason that nobody has recorded it yet.
 
 ## Scope
 
 Phase 1 covers `ui/components/Components.kt` and `ui/theme/Theme.kt` only.
+
+There are deliberately **no `@Preview` functions**. Previews would have to live in
+`app/src/main` — i.e. inside `Components.kt` — so this phase uses test-local fixtures instead.
+A dual-use preview set belongs in phase 2, alongside the stateless-screen refactor.
 
 Screens are deliberately excluded. Every screen takes the DI graph and builds its own ViewModel
 internally (`HomeScreen(container: AppContainer, …)`), and `AppContainer` eagerly opens a Room
