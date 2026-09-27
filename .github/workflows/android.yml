@@ -3,7 +3,9 @@ name: Android CI
 on:
   push:
   pull_request:
-  workflow_dispatch: # "Run workflow" button, for a fresh release bundle without a code change
+  # "Run workflow" button. Builds a fresh release bundle without a code change, and also runs
+  # the record-screenshots job below, which re-records the goldens on Linux and commits them.
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,6 +23,32 @@ jobs:
 
       - name: Core unit tests (SMS parser, analytics)
         run: ./gradlew -p core test --console=plain
+
+      # Robolectric downloads a ~200 MB instrumented android-all jar into ~/.m2 on first use.
+      - name: Cache the Robolectric android-all jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: robolectric-${{ runner.os }}-
+
+      # Renders Compose to PNG on the JVM (Roborazzi + Robolectric) and asserts component
+      # placement. No emulator: it is an ordinary unit test task. See app/src/test/README.md.
+      - name: Screenshot and placement tests
+        run: |
+          if [ -z "$(ls -A app/src/test/screenshots 2>/dev/null)" ]; then
+            echo "::warning::No golden images are committed yet, so this run records them instead of comparing. The placement assertions still ran. Trigger the 'Record screenshot goldens' workflow to commit baselines."
+            ./gradlew :app:recordRoborazziDebug --console=plain
+          else
+            ./gradlew :app:verifyRoborazziDebug --console=plain
+          fi
+
+      - name: Upload screenshot diffs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: screenshot-diffs
+          path: app/build/outputs/roborazzi/
 
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --console=plain
@@ -102,4 +130,52 @@ jobs:
         if: failure()
         with:
           name: test-reports
-          path: core/build/reports/tests/
+          path: |
+            core/build/reports/tests/
+            app/build/reports/tests/
+
+  # Golden images must be recorded on Linux: the display font is FontFamily.Serif, a system font
+  # with no bundled file, so text rasterises differently on a developer's macOS machine than on
+  # this runner. Recording anywhere else guarantees a red CI on the next PR.
+  #
+  # Run this manually (Actions > Record screenshot goldens > Run workflow) after changing a
+  # component's appearance on purpose, then review the committed PNGs in the diff.
+  record-screenshots:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache the Robolectric android-all jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: robolectric-${{ runner.os }}-
+
+      - name: Record goldens
+        run: ./gradlew :app:recordRoborazziDebug --console=plain
+
+      - name: Commit any changed goldens
+        run: |
+          if git diff --quiet -- app/src/test/screenshots; then
+            echo "Goldens are already up to date; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/test/screenshots
+          git commit -m "Record Roborazzi goldens on Linux CI"
+          git push origin HEAD:"${{ github.ref_name }}"

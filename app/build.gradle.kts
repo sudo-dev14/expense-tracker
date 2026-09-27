@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.roborazzi)
 }
 
 // Release signing comes from environment variables (CI secrets) or, for local builds, from a
@@ -64,6 +65,17 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        // Robolectric renders real Compose output, so it needs the merged resources and manifest.
+        unitTests.isIncludeAndroidResources = true
+    }
+}
+
+roborazzi {
+    // Golden images live in the test source set, so they show up in review like any other file.
+    // The tests pass matching explicit file names; this tells the Gradle tasks where to look.
+    outputDir.set(layout.projectDirectory.dir("src/test/screenshots"))
 }
 
 ksp {
@@ -92,4 +104,13 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+
+    // Supplies the ComponentActivity that createComposeRule() launches.
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
