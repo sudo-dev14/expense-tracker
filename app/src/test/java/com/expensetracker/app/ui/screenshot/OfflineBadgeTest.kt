@@ -44,16 +44,21 @@ class OfflineBadgeTest : ScreenshotTest() {
         // The label is centred in the 32dp pill, which is itself centred in the 48dp target, so
         // the label still sits on the middle of the whole thing.
         val target = compose.onNodeWithContentDescription(OFFLINE_DESCRIPTION).getUnclippedBoundsInRoot()
-        val label = compose.onNodeWithText("Offline").getUnclippedBoundsInRoot()
+        val label = compose.onNodeWithText("Offline", useUnmergedTree = true).getUnclippedBoundsInRoot()
         assertDp(target.top + (target.height - label.height) / 2, label.top, "label vertical centring")
     }
 
+    /**
+     * The badge merges its descendants so TalkBack reads one node rather than announcing
+     * "Offline" twice, which means a text lookup finds the merged parent and reports its bounds.
+     * Measuring the label itself needs `useUnmergedTree`, the same trap `TransactionRow` has.
+     */
     @Test
     fun `label sits inside the pill with 12dp of horizontal padding after the icon`() {
         setBareContent { OfflineBadge() }
 
         val pill = compose.onNodeWithContentDescription(OFFLINE_DESCRIPTION).getUnclippedBoundsInRoot()
-        val label = compose.onNodeWithText("Offline").getUnclippedBoundsInRoot()
+        val label = compose.onNodeWithText("Offline", useUnmergedTree = true).getUnclippedBoundsInRoot()
 
         // Icon (14dp) then a 6dp gap, all inside 12dp of padding: label.left = pill.left + 12 + 14 + 6.
         assertDp(pill.left + 32.dp, label.left, "label left edge")

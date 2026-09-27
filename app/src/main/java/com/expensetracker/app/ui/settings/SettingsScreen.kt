@@ -71,6 +71,7 @@ import com.expensetracker.app.LanguageManager
 import com.expensetracker.app.R
 import com.expensetracker.app.data.ThemeMode
 import com.expensetracker.app.ui.displayName
+import com.expensetracker.app.ui.components.isDark
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.components.SectionLabel
 import com.expensetracker.app.ui.theme.PrimaryButtonHeight
@@ -273,17 +274,23 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
 
 @Composable
 private fun PrivacyCenter(trackingOn: Boolean, onHowTo: () -> Unit) {
-    val onCard = MaterialTheme.colorScheme.onPrimary
+    // Branched rather than left to one token, because `primary` plays opposite roles in the two
+    // schemes: a deep authoritative teal slab in light, but bright mint in dark, where it became
+    // the most luminous block in an otherwise calm app. The dark teal container keeps the card
+    // emphatic without shouting.
+    val dark = isDark()
+    val cardColor = if (dark) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary
+    val onCard = if (dark) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimary
     Column(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(cardColor)
             .padding(18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Icon(Icons.Outlined.Lock, contentDescription = null, tint = onCard)
-            Text(stringResource(R.string.set_privacy_center), color = onCard, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Text(stringResource(R.string.set_privacy_center), color = onCard, style = MaterialTheme.typography.titleMedium)
         }
         Spacer(Modifier.height(12.dp))
         listOf(

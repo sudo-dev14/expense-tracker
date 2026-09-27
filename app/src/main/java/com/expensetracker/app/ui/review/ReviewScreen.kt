@@ -160,7 +160,7 @@ private fun ReviewCard(tx: TransactionEntity) {
                 Text(
                     stringResource(if (tx.merchant == null) R.string.review_no_payee else R.string.review_unfamiliar_format),
                     color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                 )
             }

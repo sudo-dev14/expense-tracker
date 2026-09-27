@@ -111,7 +111,7 @@ fun OfflineBadge(onClick: (() -> Unit)? = null) {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .then(if (onClick != null) Modifier.heightIn(min = 48.dp).clickable(onClick = onClick) else Modifier)
-            .semantics { contentDescription = badgeDescription },
+            .semantics(mergeDescendants = true) { contentDescription = badgeDescription },
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -125,7 +125,7 @@ fun OfflineBadge(onClick: (() -> Unit)? = null) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
-                Text(stringResource(R.string.comp_offline), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.comp_offline), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -320,7 +320,7 @@ fun TransactionRow(tx: TransactionEntity, onClick: () -> Unit, modifier: Modifie
                     .joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
         }

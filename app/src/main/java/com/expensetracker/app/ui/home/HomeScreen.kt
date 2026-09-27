@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +59,7 @@ import com.expensetracker.app.ui.components.SpendingBars
 import com.expensetracker.app.ui.components.TransactionRow
 import com.expensetracker.app.ui.components.color
 import com.expensetracker.app.ui.theme.AmountStyle
+import com.expensetracker.app.ui.theme.HeroAmount
 import com.expensetracker.core.analytics.Bucket
 import com.expensetracker.core.analytics.Granularity
 import com.expensetracker.core.analytics.RangePreset
@@ -172,7 +174,7 @@ private fun SummaryCard(state: HomeUiState) {
         val upColor = if (MaterialTheme.colorScheme.background.luminance() > 0.5f) Color(0xFFA5620F) else MaterialTheme.colorScheme.tertiary
         Text(title, color = heroMuted, style = MaterialTheme.typography.bodyMedium)
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(Money.format(state.summary.spentMinor), style = AmountStyle, fontSize = 40.sp, color = onHero)
+            Text(Money.format(state.summary.spentMinor), style = HeroAmount, color = onHero)
             state.changePercent?.let { change ->
                 val up = change > 0
                 val comparison = stringResource(state.comparisonLabelRes)
@@ -195,7 +197,7 @@ private fun SummaryCard(state: HomeUiState) {
                     )
                     Text(
                         stringResource(R.string.home_change_percent, abs(change), comparison),
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (up) upColor else MaterialTheme.colorScheme.primary,
                     )
@@ -205,15 +207,14 @@ private fun SummaryCard(state: HomeUiState) {
         HorizontalDivider(Modifier.padding(vertical = 14.dp), color = onHero.copy(alpha = 0.12f))
         Row {
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.home_income), fontSize = 12.sp, color = heroMuted)
-                Text(Money.format(state.summary.incomeMinor), fontWeight = FontWeight.Bold, fontSize = 17.sp, color = onHero)
+                Text(stringResource(R.string.home_income), style = MaterialTheme.typography.labelMedium, color = heroMuted)
+                Text(Money.format(state.summary.incomeMinor), style = MaterialTheme.typography.titleMedium, color = onHero)
             }
             Column(Modifier.weight(1f)) {
-                Text(stringResource(if (state.summary.netMinor >= 0) R.string.home_net_saved else R.string.home_net_overspent), fontSize = 12.sp, color = heroMuted)
+                Text(stringResource(if (state.summary.netMinor >= 0) R.string.home_net_saved else R.string.home_net_overspent), style = MaterialTheme.typography.labelMedium, color = heroMuted)
                 Text(
                     Money.format(state.summary.netMinor, signed = true),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     color = if (state.summary.netMinor >= 0) MaterialTheme.colorScheme.primary else upColor,
                 )
             }
@@ -273,6 +274,7 @@ private fun EmptyState(onAdd: () -> Unit) {
             stringResource(R.string.home_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
         TextButton(onClick = onAdd) { Text(stringResource(R.string.home_add_manually)) }
     }
@@ -309,8 +311,8 @@ private fun CategoryCard(state: HomeUiState, onCategory: (Category) -> Unit) {
                                 .padding(vertical = 5.dp),
                         ) {
                             Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(c.category.color))
-                            Text(c.category.displayName(), fontSize = 14.sp, modifier = Modifier.weight(1f), maxLines = 1)
-                            Text("${(c.share * 100).toInt()}%", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text(c.category.displayName(), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f), maxLines = 1)
+                            Text("${(c.share * 100).toInt()}%", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

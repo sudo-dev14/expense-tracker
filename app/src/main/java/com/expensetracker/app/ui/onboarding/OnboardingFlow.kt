@@ -69,10 +69,9 @@ import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.app.ui.components.SectionLabel
 import com.expensetracker.app.ui.components.toLocalDate
 import com.expensetracker.app.ui.theme.PrimaryButtonHeight
+import com.expensetracker.app.ui.theme.OnboardingTitle
 import com.expensetracker.core.format.Money
 import com.expensetracker.core.model.TransactionType
-import java.text.NumberFormat
-import java.util.Locale
 
 private enum class Step { PRIVACY, AUTO_TRACKING, IMPORT }
 
@@ -168,7 +167,7 @@ private fun PrivacyPromise(onContinue: () -> Unit) {
             Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
         }
         Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.onb_privacy_title), style = MaterialTheme.typography.displaySmall.copy(fontSize = 34.sp, lineHeight = 38.sp))
+        Text(stringResource(R.string.onb_privacy_title), style = OnboardingTitle)
         Spacer(Modifier.height(14.dp))
         Text(
             stringResource(R.string.onb_privacy_body),
@@ -230,7 +229,7 @@ private fun AutoTracking(onBack: () -> Unit, onTurnOn: () -> Unit, onSkip: () ->
         },
     ) {
         Spacer(Modifier.height(24.dp))
-        Text(stringResource(R.string.onb_auto_title), style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp, lineHeight = 37.sp))
+        Text(stringResource(R.string.onb_auto_title), style = OnboardingTitle)
         Spacer(Modifier.height(12.dp))
         Text(
             stringResource(R.string.onb_auto_body),
@@ -273,7 +272,6 @@ private fun Quality(icon: ImageVector, title: String, body: String) {
 @Composable
 private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
     val state by container.importer.state.collectAsStateWithLifecycle()
-    val numbers = remember { NumberFormat.getIntegerInstance(Locale("en", "IN")) }
     OnboardingPage(
         stepLabel = stringResource(R.string.onb_step_of, 3, 3),
         bottom = {
@@ -292,7 +290,7 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
         Spacer(Modifier.height(24.dp))
         Text(
             if (state.finished) stringResource(R.string.onb_import_done_title) else stringResource(R.string.onb_import_running_title),
-            style = MaterialTheme.typography.displaySmall.copy(fontSize = 32.sp),
+            style = OnboardingTitle,
         )
         Spacer(Modifier.height(10.dp))
         Text(stringResource(R.string.onb_import_offline_note), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -312,8 +310,8 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
         }
         Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatTile(numbers.format(state.scanned), pluralStringResource(R.plurals.onb_import_messages_checked, state.scanned), Modifier.weight(1f))
-            StatTile(numbers.format(state.found), pluralStringResource(R.plurals.onb_import_transactions_found, state.found), Modifier.weight(1f), highlight = true)
+            StatTile(Money.group(state.scanned.toLong()), pluralStringResource(R.plurals.onb_import_messages_checked, state.scanned), Modifier.weight(1f))
+            StatTile(Money.group(state.found.toLong()), pluralStringResource(R.plurals.onb_import_transactions_found, state.found), Modifier.weight(1f), highlight = true)
         }
         if (state.recent.isNotEmpty()) {
             Spacer(Modifier.height(24.dp))

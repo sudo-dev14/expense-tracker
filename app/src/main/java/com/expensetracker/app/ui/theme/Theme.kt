@@ -17,6 +17,10 @@ import androidx.compose.ui.unit.sp
 import com.expensetracker.app.data.ThemeMode
 
 // Calm palette from the wireframes: deep teal for primary actions, amber for "needs attention".
+//
+// Deliberately NOT dynamic colour. Amber is semantic here, not decoration: it marks "needs
+// attention" on the review banner, the peak bar, the swipe-to-dismiss background and the review
+// chip. A wallpaper-derived scheme would scramble all four.
 /**
  * Exposed because the PDF exporter draws on paper and therefore always uses the light palette.
  * It previously kept its own copy of these four values, which could drift silently.
@@ -98,6 +102,20 @@ private val AppTypography = Typography().run {
 }
 
 val AmountStyle = TextStyle(fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold)
+
+/** The one big number on the dashboard. Bespoke rather than a type-scale role, hence named here. */
+val HeroAmount = AmountStyle.copy(fontSize = 40.sp)
+
+/**
+ * Onboarding page titles. One value: the three pages had drifted to 34sp, 32sp and 32sp for what
+ * is the same role on consecutive screens.
+ */
+val OnboardingTitle = TextStyle(
+    fontFamily = DisplayFamily,
+    fontWeight = FontWeight.SemiBold,
+    fontSize = 32.sp,
+    lineHeight = 37.sp,
+)
 
 /**
  * The corner scale. Cards and the FAB are [large]; buttons are [extraLarge], which at the button
