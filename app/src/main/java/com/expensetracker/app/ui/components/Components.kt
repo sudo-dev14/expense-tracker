@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -220,7 +221,13 @@ fun MerchantAvatar(name: String, category: Category, size: Dp = 40.dp) {
             .clip(RoundedCornerShape(size * 0.32f))
             .background(category.color.copy(alpha = if (isDark()) 0.28f else 0.14f)),
     ) {
-        Text(initials, color = category.textColor(), fontWeight = FontWeight.Bold, fontSize = (size.value * 0.33f).sp)
+        // Sized in dp-converted-to-sp rather than plain sp, so the glyphs stay inside the fixed
+        // box at any font scale. Plain sp grows with the user's setting while the box does not,
+        // and at 2x the second initial stopped being drawn — "Wonder World" and "Mega Mart" both
+        // rendered as a single letter. The merchant's full name sits beside every avatar and does
+        // scale, so nothing is lost by holding the initials at a constant size.
+        val initialsSize = with(LocalDensity.current) { (size * 0.33f).toSp() }
+        Text(initials, color = category.textColor(), fontWeight = FontWeight.Bold, fontSize = initialsSize)
     }
 }
 

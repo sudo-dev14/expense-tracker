@@ -135,24 +135,22 @@ class MerchantAvatarTest : ScreenshotTest() {
     }
 
     /**
-     * KNOWN DEFECT, pinned deliberately. At 2x the widest initial pair ("WW") measures exactly
-     * the width of its 40dp container — it has saturated the box instead of being scaled down to
-     * fit. Compare "BT", which still has room to spare.
+     * Both initials keep rendering at a large font scale.
      *
-     * The consequence is visible in `MerchantAvatar_fontScale2_light.png`: the pair no longer
-     * fits, and only the *first* letter survives. "Wonder World" renders as "W" and "Mega Mart"
-     * as "M", so at a large font scale two different merchants become indistinguishable. It is a
-     * silent loss of information, not merely an overflow.
+     * This replaces a characterisation test that pinned the opposite behaviour: the initials were
+     * sized in raw sp inside a fixed-size box, so at 2x "WW" saturated its 40dp container and only
+     * the first letter was drawn — "Wonder World" and "Mega Mart" both rendered as one letter and
+     * became indistinguishable. They are now sized from the avatar's dp, so they hold a constant
+     * physical size whatever the user's font setting.
      *
-     * This is a characterisation test: it records what the component does today, not what it
-     * should do. When `MerchantAvatar` is fixed to clamp its font size (or to use `autoSize`),
-     * this test will fail — that failure is the signal to delete it, because
-     * `initials never escape the avatar at 2x` above will then be carrying the invariant on its
-     * own. The `MerchantAvatar_fontScale2` goldens show the clipping.
+     * Width is the proxy for "both glyphs actually drew". The semantics tree reports the string
+     * handed to `Text`, so `onNodeWithText("WW")` matches even when only "W" is visible, and
+     * `getUnclippedBoundsInRoot` returns the *constrained* bounds — which is why the containment
+     * check above passes either way and cannot detect this on its own.
      */
     @Test
     @Config(fontScale = 2.0f)
-    fun `widest initials saturate the avatar at 2x - known defect`() {
+    fun `both initials still fit inside the avatar at 2x`() {
         setBareContent {
             Row {
                 Box(Modifier.testTag("bt")) { MerchantAvatar("Blue Tokai", Category.FOOD) }
@@ -163,8 +161,12 @@ class MerchantAvatarTest : ScreenshotTest() {
         val narrow = compose.onNodeWithText("BT", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val wide = compose.onNodeWithText("WW", useUnmergedTree = true).getUnclippedBoundsInRoot()
 
-        assertDp(40.dp, wide.width, "\"WW\" has saturated the 40dp avatar")
-        assertTrue("\"BT\" (${narrow.width}) should still fit inside 40dp", narrow.width < 40.dp)
+        assertTrue("\"WW\" (${wide.width}) should fit the 40dp avatar with room to spare", wide.width < 40.dp)
+        assertTrue(
+            "\"WW\" (${wide.width}) should measure wider than \"BT\" (${narrow.width}); if they match, " +
+                "the second glyph was dropped",
+            wide.width > narrow.width,
+        )
     }
 
     private companion object {
