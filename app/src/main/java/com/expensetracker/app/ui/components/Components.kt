@@ -78,9 +78,19 @@ val Category.color: Color get() = Color(colorArgb)
 @Composable
 fun isDark(): Boolean = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
-/** Category colour made readable as text on the current background. */
+/**
+ * The colour for initials drawn on [MerchantAvatar]'s category-tinted background.
+ *
+ * The branches differ because the backgrounds do. In dark mode the tint sits at 28% over a
+ * near-black surface, so lightening the category colour halfway to white clears 4.5:1 while
+ * keeping the hue. In light mode the same trick cannot work by construction: it would put the
+ * category colour on a 14% wash of that same colour, which barely separates — 10 of the 12
+ * categories failed 4.5:1, the fallback OTHER worst at 1.7:1. The category still reads from the
+ * background tint, so the initials use the ordinary text colour instead.
+ */
 @Composable
-fun Category.textColor(): Color = if (isDark()) lerp(color, Color.White, 0.5f) else color
+fun Category.textColor(): Color =
+    if (isDark()) lerp(color, Color.White, 0.5f) else MaterialTheme.colorScheme.onSurface
 
 /** The lock + "Offline" pill shown in every top bar. */
 @Composable
