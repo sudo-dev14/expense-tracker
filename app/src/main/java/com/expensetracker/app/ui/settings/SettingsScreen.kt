@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +58,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -112,7 +117,11 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)) {
-            Text(stringResource(R.string.set_title), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 12.dp))
+            Text(
+                stringResource(R.string.set_title),
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(vertical = 12.dp).semantics { heading() },
+            )
 
             PrivacyCenter(trackingOn = trackingOn, onHowTo = { showHowTo = true })
             Spacer(Modifier.height(16.dp))
@@ -128,7 +137,24 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
                         onOpenRules,
                     )
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
+                    val onTrackingChange: (Boolean) -> Unit = { on ->
+                        if (!on) container.prefs.setAutoTracking(false)
+                        else if (hasPermission) {
+                            container.prefs.setAutoTracking(true)
+                            container.importer.start()
+                        } else {
+                            permissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS))
+                        }
+                    }
+                    // The row owns the toggle, so the label, its on/off subtitle and the switch
+                    // read as a single control rather than three unrelated nodes.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .toggleable(value = trackingOn, onValueChange = onTrackingChange, role = Role.Switch)
+                            .padding(vertical = 12.dp),
+                    ) {
                         Column(Modifier.weight(1f)) {
                             Text(stringResource(R.string.set_auto_tracking), fontWeight = FontWeight.SemiBold)
                             Text(
@@ -137,18 +163,7 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Switch(
-                            checked = trackingOn,
-                            onCheckedChange = { on ->
-                                if (!on) container.prefs.setAutoTracking(false)
-                                else if (hasPermission) {
-                                    container.prefs.setAutoTracking(true)
-                                    container.importer.start()
-                                } else {
-                                    permissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS))
-                                }
-                            },
-                        )
+                        Switch(checked = trackingOn, onCheckedChange = null)
                     }
                     if (trackingOn) {
                         if (importState.running) {
@@ -288,7 +303,12 @@ private fun PrivacyCenter(trackingOn: Boolean, onHowTo: () -> Unit) {
             color = onCard,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.clickable(onClick = onHowTo).padding(top = 8.dp),
+            // A bodySmall line with 8dp above measured about 24dp of tappable height.
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .heightIn(min = 48.dp)
+                .clickable(onClick = onHowTo)
+                .wrapContentHeight(Alignment.CenterVertically),
         )
     }
 }

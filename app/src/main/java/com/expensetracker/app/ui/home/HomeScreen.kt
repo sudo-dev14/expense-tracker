@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -298,6 +299,9 @@ private fun CategoryCard(state: HomeUiState, onCategory: (Category) -> Unit) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(6.dp))
+                                // Each row navigates to a filtered list, so it needs the 48dp
+                                // minimum; at 14sp with 5dp padding it measured about 28dp.
+                                .heightIn(min = 48.dp)
                                 .clickable { onCategory(c.category) }
                                 .padding(vertical = 5.dp),
                         ) {
@@ -328,7 +332,24 @@ private fun TrendCard(state: HomeUiState) {
                 }
             }
             Spacer(Modifier.height(16.dp))
-            SpendingBars(state.buckets, Modifier.fillMaxWidth().height(100.dp))
+            // Without this the whole card is silent to a screen reader apart from the peak
+            // label, the way the donut was before it got its own description.
+            val barsDescription = state.buckets
+                .map {
+                    stringResource(
+                        R.string.home_trend_bar_cd,
+                        it.displayLabel(state.bucketGranularity),
+                        Money.compact(it.amountMinor),
+                    )
+                }
+                .joinToString()
+            SpendingBars(
+                state.buckets,
+                Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .semantics { contentDescription = barsDescription },
+            )
             if (state.buckets.isNotEmpty()) {
                 Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
                     Text(state.buckets.first().displayLabel(state.bucketGranularity), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

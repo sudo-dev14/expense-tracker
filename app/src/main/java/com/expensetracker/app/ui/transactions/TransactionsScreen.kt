@@ -202,7 +202,8 @@ private fun DayHeader(group: DayGroup) {
     }
     Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 4.dp)) {
         SectionLabel(label, Modifier.weight(1f))
-        SectionLabel(Money.format(group.netMinor, signed = true))
+        // The day's net is a value in this heading, not a second section to navigate to.
+        SectionLabel(Money.format(group.netMinor, signed = true), isHeading = false)
     }
 }
 

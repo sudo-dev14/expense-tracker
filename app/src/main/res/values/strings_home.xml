@@ -44,6 +44,8 @@
     <string name="home_trend_title">Spending over time</string>
     <!-- %1$s = amount, %2$s = date of the highest bar -->
     <string name="home_peak">Peak %1$s · %2$s</string>
+    <!-- Screen reader text for one bar of the trend chart: %1$s = period, %2$s = amount -->
+    <string name="home_trend_bar_cd">%1$s %2$s</string>
 
     <string name="home_top_merchants">Top merchants</string>
     <plurals name="home_payments">

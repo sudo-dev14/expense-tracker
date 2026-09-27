@@ -28,6 +28,26 @@ class OfflineBadgeTest : ScreenshotTest() {
             .assertHeightIsEqualTo(32.dp)
     }
 
+    /**
+     * The badge opens the Privacy Center and appears on every top bar, so when it is tappable its
+     * hit target has to clear the 48dp accessibility minimum — while the pill itself stays 32dp,
+     * because growing the visible chip would unbalance the header.
+     */
+    @Test
+    fun `a tappable badge has a 48dp hit target but still looks 32dp`() {
+        setBareContent { OfflineBadge(onClick = {}) }
+
+        compose.onNodeWithContentDescription(OFFLINE_DESCRIPTION)
+            .assertIsDisplayed()
+            .assertHeightIsEqualTo(48.dp)
+
+        // The label is centred in the 32dp pill, which is itself centred in the 48dp target, so
+        // the label still sits on the middle of the whole thing.
+        val target = compose.onNodeWithContentDescription(OFFLINE_DESCRIPTION).getUnclippedBoundsInRoot()
+        val label = compose.onNodeWithText("Offline").getUnclippedBoundsInRoot()
+        assertDp(target.top + (target.height - label.height) / 2, label.top, "label vertical centring")
+    }
+
     @Test
     fun `label sits inside the pill with 12dp of horizontal padding after the icon`() {
         setBareContent { OfflineBadge() }

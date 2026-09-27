@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -97,22 +99,29 @@ fun Category.textColor(): Color =
 @Composable
 fun OfflineBadge(onClick: (() -> Unit)? = null) {
     val badgeDescription = stringResource(R.string.comp_offline_badge_cd)
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    // The pill keeps its 32dp look, but when it is tappable the hit target around it grows to the
+    // 48dp minimum. This is the entry point to the Privacy Center and it sits on every top bar,
+    // so it was the most-repeated undersized target in the app.
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
-            .height(32.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(if (onClick != null) Modifier.heightIn(min = 48.dp).clickable(onClick = onClick) else Modifier)
             .semantics { contentDescription = badgeDescription },
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.height(32.dp),
         ) {
-            Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
-            Text(stringResource(R.string.comp_offline), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(14.dp))
+                Text(stringResource(R.string.comp_offline), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -125,18 +134,29 @@ fun ScreenHeader(title: String, onBadgeClick: (() -> Unit)? = null) {
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+        Text(
+            title,
+            style = MaterialTheme.typography.headlineMedium,
+            // Marked as a heading so TalkBack and Switch Access can jump between sections
+            // instead of swiping through every row of a long list.
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
         OfflineBadge(onBadgeClick)
     }
 }
 
+/**
+ * The app's section divider. Marked as a heading by default, since this is what heading
+ * navigation lands on; pass [isHeading] = false where the style is reused for a value rather
+ * than a label, so screen readers don't announce two headings for one section.
+ */
 @Composable
-fun SectionLabel(text: String, modifier: Modifier = Modifier) {
+fun SectionLabel(text: String, modifier: Modifier = Modifier, isHeading: Boolean = true) {
     Text(
         text.uppercase(),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier,
+        modifier = if (isHeading) modifier.semantics { heading() } else modifier,
     )
 }
 

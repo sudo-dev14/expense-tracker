@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -148,7 +152,11 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(56.dp).padding(horizontal = 8.dp)) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back)) }
-            Text(stringResource(R.string.export_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.export_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             AppCard(Modifier.padding(horizontal = 20.dp)) {
@@ -228,9 +236,17 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
 
 @Composable
 private fun OptionRow(label: String, checked: Boolean, last: Boolean = false, onChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+    // The whole row is the control, so the label and the switch read as one node ("Summary and
+    // totals, switch, on") instead of two unrelated ones, and tapping the label works.
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(52.dp)
+            .toggleable(value = checked, onValueChange = onChange, role = Role.Switch),
+    ) {
         Text(label, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = null)
     }
     if (!last) HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
 }

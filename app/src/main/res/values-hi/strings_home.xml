@@ -38,6 +38,7 @@
 
     <string name="home_trend_title">समय के साथ ख़र्च</string>
     <string name="home_peak">सबसे ज़्यादा %1$s · %2$s</string>
+    <string name="home_trend_bar_cd">%1$s %2$s</string>
 
     <string name="home_top_merchants">सबसे ज़्यादा ख़र्च यहाँ</string>
     <plurals name="home_payments">
