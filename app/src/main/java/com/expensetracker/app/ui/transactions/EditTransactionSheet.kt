@@ -34,8 +34,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SheetState
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
@@ -45,8 +43,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,7 +54,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -180,18 +175,6 @@ class EditTransactionViewModel(private val container: AppContainer, private val 
     }
 }
 
-private const val CLOSE_DRAG_FRACTION = 0.35f
-
-@OptIn(ExperimentalMaterial3Api::class)
-private fun draggedFarEnoughToClose(state: SheetState, restOffset: Float, sheetHeight: Float): Boolean {
-    val offset = runCatching { state.requireOffset() }.getOrNull() ?: return true
-    if (restOffset.isNaN() || sheetHeight <= 0f) return true
-    val dragged = offset - restOffset
-    // Not dragged at all: Back or a tap outside the sheet, which still close it.
-    if (dragged < 1f) return true
-    return dragged >= sheetHeight * CLOSE_DRAG_FRACTION
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss: () -> Unit) {
@@ -212,17 +195,7 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
         EditTransactionViewModel(container, transactionId)
     }
     val state by vm.state.collectAsStateWithLifecycle()
-    // Swiping down only closes the sheet once it has been dragged at least 35% of its height;
-    // shorter drags and quick flicks snap it back. Back and tapping outside still close it.
-    var sheetHeightPx by remember { mutableFloatStateOf(0f) }
-    var restOffsetPx by remember { mutableFloatStateOf(Float.NaN) }
-    lateinit var sheetState: SheetState
-    sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-        confirmValueChange = { target ->
-            target != SheetValue.Hidden || draggedFarEnoughToClose(sheetState, restOffsetPx, sheetHeightPx)
-        },
-    )
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // A fling that reaches the top of the form would otherwise carry on into the sheet, pulling it
     // down and snapping it back. Deliberate drags from the top still move the sheet.
     val keepFlingsInForm = remember {
@@ -231,15 +204,6 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                 if (source == NestedScrollSource.SideEffect) available else Offset.Zero
 
             override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity = available
-        }
-    }
-    // Remember where the sheet rests when fully open, so a drag can be measured from there.
-    LaunchedEffect(sheetState, sheetHeightPx) {
-        restOffsetPx = Float.NaN
-        snapshotFlow { runCatching { sheetState.requireOffset() }.getOrNull() }.collect { offset ->
-            if (offset != null && sheetState.currentValue == SheetValue.Expanded && (restOffsetPx.isNaN() || offset < restOffsetPx)) {
-                restOffsetPx = offset
-            }
         }
     }
     var showSms by remember { mutableStateOf(true) }
@@ -251,11 +215,8 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
 
     // Every way out goes through here, so the sheet always slides down before it leaves
     // composition. Calling the caller's onDismiss directly clears the id that renders this
-    // sheet, dropping it mid-frame with no exit animation.
-    //
-    // This cooperates with confirmValueChange above rather than fighting it: hide() starts from
-    // the rest offset, so draggedFarEnoughToClose sees no drag and permits the move to Hidden.
-    // The guard stops a scrim tap racing a save from starting two of these.
+    // sheet, dropping it mid-frame with no exit animation. The guard stops a scrim tap racing
+    // a save from starting two dismissals.
     val scope = rememberCoroutineScope()
     var dismissing by remember { mutableStateOf(false) }
     val dismiss: () -> Unit = {
@@ -272,7 +233,6 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
     ModalBottomSheet(onDismissRequest = dismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface) {
         Column(
             Modifier
-                .onSizeChanged { sheetHeightPx = it.height.toFloat() }
                 .nestedScroll(keepFlingsInForm)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
