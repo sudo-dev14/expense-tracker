@@ -50,6 +50,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -248,7 +249,27 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
     // instead of opening nearly empty and then jumping.
     if (!state.loaded) return
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface) {
+    // Every way out goes through here, so the sheet always slides down before it leaves
+    // composition. Calling the caller's onDismiss directly clears the id that renders this
+    // sheet, dropping it mid-frame with no exit animation.
+    //
+    // This cooperates with confirmValueChange above rather than fighting it: hide() starts from
+    // the rest offset, so draggedFarEnoughToClose sees no drag and permits the move to Hidden.
+    // The guard stops a scrim tap racing a save from starting two of these.
+    val scope = rememberCoroutineScope()
+    var dismissing by remember { mutableStateOf(false) }
+    val dismiss: () -> Unit = {
+        if (!dismissing) {
+            dismissing = true
+            scope.launch {
+                sheetState.hide()
+                onDismiss()
+            }
+        }
+    }
+
+    // Covers the scrim tap, the back gesture and a swipe past the drag threshold.
+    ModalBottomSheet(onDismissRequest = dismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface) {
         Column(
             Modifier
                 .onSizeChanged { sheetHeightPx = it.height.toFloat() }
@@ -403,19 +424,19 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                 when {
                     original == null -> {}
                     original.source == Source.MANUAL -> OutlinedButton(
-                        onClick = { vm.delete(onDismiss) },
+                        onClick = { vm.delete(dismiss) },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(26.dp),
                     ) { Text(stringResource(R.string.action_delete)) }
                     else -> OutlinedButton(
-                        onClick = { vm.markNotExpense(onDismiss) },
+                        onClick = { vm.markNotExpense(dismiss) },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(26.dp),
                     ) { Text(stringResource(R.string.txn_not_expense)) }
                 }
                 Button(
-                    onClick = { vm.save(onDismiss) },
-                    enabled = state.amountMinor != null,
+                    onClick = { vm.save(dismiss) },
+                    enabled = state.amountMinor != null && !dismissing,
                     modifier = Modifier.weight(1f).height(52.dp),
                     shape = RoundedCornerShape(26.dp),
                 ) { Text(stringResource(if (state.isNew) R.string.edit_add else R.string.action_save), fontWeight = FontWeight.Bold) }

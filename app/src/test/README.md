@@ -98,10 +98,31 @@ There are deliberately **no `@Preview` functions**. Previews would have to live 
 `app/src/main` — i.e. inside `Components.kt` — so this phase uses test-local fixtures instead.
 A dual-use preview set belongs in phase 2, alongside the stateless-screen refactor.
 
-Screens are deliberately excluded. Every screen takes the DI graph and builds its own ViewModel
-internally (`HomeScreen(container: AppContainer, …)`), and `AppContainer` eagerly opens a Room
-database and an SMS reader, so a screen cannot be rendered without first being refactored into a
-stateless overload that takes its state as parameters. That refactor is phase 2.
+Screens were originally excluded here on the assumption that `AppContainer` could not be built in
+a test — it opens a Room database, preferences, an SMS reader and a PDF exporter from a Context.
+**That assumption was wrong.** `EditTransactionSheetTest` constructs a real `AppContainer` from
+Robolectric's application context and renders the real screen; everything the container builds
+works on the JVM so long as nothing queries the SMS provider. Screens do not need to be
+refactored into stateless overloads to be testable, so phase 2 is a design improvement rather
+than a prerequisite for coverage.
+
+### What still cannot be tested here: the sheet's dismissal
+
+`ModalBottomSheet` renders in its own window and its scrim never receives a synthetic click under
+Robolectric — tapping it leaves the sheet displayed, so a test built on it passes whether or not
+the code works. The other exits are no better: the save path is asynchronous, which would make a
+timing assertion succeed even with the animation removed, and a back press needs an activity that
+`createComposeRule` does not have.
+
+So the exit animation is verified on a device instead, by recording the dismissal and confirming
+the sheet translates over several frames rather than disappearing in one:
+
+```
+adb shell screenrecord --time-limit 4 /sdcard/dismiss.mp4   # tap the scrim while recording
+adb pull /sdcard/dismiss.mp4 && ffmpeg -i dismiss.mp4 -vf fps=30 f%03d.png
+```
+
+This matters because that exact behaviour regressed once, silently, with nothing to catch it.
 
 ## Conventions
 
