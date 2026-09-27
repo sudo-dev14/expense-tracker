@@ -199,8 +199,13 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
             SectionLabel(stringResource(R.string.set_language))
             Spacer(Modifier.height(8.dp))
             // A row plus a picker, not segmented buttons: "फ़ोन की भाषा" doesn't fit in a three-way row.
+            // padding = 0.dp leaves the horizontal inset to the caller, so that dividers can run
+            // to the card's edge in the multi-row card above. This card has a single row and no
+            // dividers, but it still owes NavRow the same 16dp: NavRow sets only vertical padding.
             AppCard(padding = 0.dp) {
-                NavRow(stringResource(language.labelRes), stringResource(R.string.set_language_change)) { showLanguagePicker = true }
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    NavRow(stringResource(language.labelRes), stringResource(R.string.set_language_change)) { showLanguagePicker = true }
+                }
             }
 
             Spacer(Modifier.height(28.dp))
