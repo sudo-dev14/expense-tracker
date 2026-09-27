@@ -43,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.snapshotFlow
@@ -67,6 +68,8 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -191,9 +194,22 @@ private fun draggedFarEnoughToClose(state: SheetState, restOffset: Float, sheetH
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss: () -> Unit) {
-    // A fresh key per opening, so "Add" never shows the previous entry's leftovers.
-    val vmKey = remember(transactionId) { "edit-$transactionId-${System.nanoTime()}" }
-    val vm: EditTransactionViewModel = viewModel(key = vmKey) { EditTransactionViewModel(container, transactionId) }
+    // The sheet keeps its own ViewModelStore rather than borrowing the Activity's. Opening it
+    // builds a fresh store, so "Add" never shows the previous entry's leftovers, and closing it
+    // clears the store, so the ViewModel is released instead of being retained for the rest of
+    // the session. (Keying a new ViewModel per opening off the Activity's store would leak one
+    // instance per open, since nothing clears those entries until the Activity is destroyed.)
+    val sheetStoreOwner = remember(transactionId) {
+        object : ViewModelStoreOwner {
+            override val viewModelStore = ViewModelStore()
+        }
+    }
+    DisposableEffect(sheetStoreOwner) {
+        onDispose { sheetStoreOwner.viewModelStore.clear() }
+    }
+    val vm: EditTransactionViewModel = viewModel(viewModelStoreOwner = sheetStoreOwner) {
+        EditTransactionViewModel(container, transactionId)
+    }
     val state by vm.state.collectAsStateWithLifecycle()
     // Swiping down only closes the sheet once it has been dragged at least 35% of its height;
     // shorter drags and quick flicks snap it back. Back and tapping outside still close it.
