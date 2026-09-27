@@ -10,6 +10,8 @@ import android.graphics.pdf.PdfDocument
 import android.text.TextUtils
 import android.text.TextPaint
 import androidx.core.content.FileProvider
+import androidx.compose.ui.graphics.toArgb
+import com.expensetracker.app.ui.theme.LightScheme
 import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.categoryEnum
@@ -92,10 +94,12 @@ class PdfExporter(private val context: Context) {
         private lateinit var canvas: Canvas
         private var y = 0f
 
-        private val ink = Color.rgb(0x17, 0x19, 0x1A)
-        private val muted = Color.rgb(0x5B, 0x60, 0x60)
-        private val line = Color.rgb(0xE3, 0xE1, 0xD9)
-        private val accent = Color.rgb(0x0E, 0x5A, 0x52)
+        // The page is paper, so it is always the light palette. Taken from the scheme rather
+        // than restated, so a palette change reaches the export too.
+        private val ink = LightScheme.onSurface.toArgb()
+        private val muted = LightScheme.onSurfaceVariant.toArgb()
+        private val line = LightScheme.outlineVariant.toArgb()
+        private val accent = LightScheme.primary.toArgb()
 
         private val title = text(22f, ink, Typeface.create(Typeface.SERIF, Typeface.BOLD))
         private val h2 = text(13f, ink, Typeface.DEFAULT_BOLD)

@@ -55,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
 import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
+import com.expensetracker.app.ui.components.AddExpenseFab
 import com.expensetracker.app.ui.components.DAY_HEADER
 import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.RangeChips
@@ -139,13 +140,11 @@ fun TransactionsScreen(
             }
             item { Spacer(Modifier.height(96.dp)) }
         }
-        FloatingActionButton(
+        AddExpenseFab(
             onClick = onAddExpense,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-        ) { Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.txn_add_expense)) }
+            contentDescription = stringResource(R.string.txn_add_expense),
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 88.dp))
     }
 }

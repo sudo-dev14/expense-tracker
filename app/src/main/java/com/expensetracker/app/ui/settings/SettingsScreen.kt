@@ -73,6 +73,7 @@ import com.expensetracker.app.data.ThemeMode
 import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.components.SectionLabel
+import com.expensetracker.app.ui.theme.PrimaryButtonHeight
 import com.expensetracker.app.ui.onboarding.HowToVerifyDialog
 import kotlinx.coroutines.launch
 
@@ -211,8 +212,8 @@ fun SettingsScreen(container: AppContainer, onOpenExport: () -> Unit, onOpenRule
             Spacer(Modifier.height(28.dp))
             OutlinedButton(
                 onClick = { confirmDelete = true },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().height(PrimaryButtonHeight),
+                shape = MaterialTheme.shapes.extraLarge,
             ) { Text(stringResource(R.string.set_delete_all), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold) }
             Spacer(Modifier.height(32.dp))
         }

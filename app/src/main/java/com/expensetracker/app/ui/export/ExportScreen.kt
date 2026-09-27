@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -56,10 +57,12 @@ import com.expensetracker.app.AppContainer
 import com.expensetracker.app.R
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.export.ExportOptions
+import com.expensetracker.app.ui.components.BackBar
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.components.FULL_DATE
 import com.expensetracker.app.ui.components.RangeChips
 import com.expensetracker.app.ui.components.SectionLabel
+import com.expensetracker.app.ui.theme.PrimaryButtonHeight
 import com.expensetracker.core.analytics.DateRange
 import com.expensetracker.core.analytics.DateRanges
 import com.expensetracker.core.analytics.RangePreset
@@ -149,88 +152,85 @@ fun ExportScreen(container: AppContainer, onBack: () -> Unit) {
         }
     }
 
-    Column(Modifier.fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(56.dp).padding(horizontal = 8.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back)) }
-            Text(
-                stringResource(R.string.export_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
-            )
-        }
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            AppCard(Modifier.padding(horizontal = 20.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Icon(Icons.Outlined.PictureAsPdf, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
-                    Column {
-                        state.range?.let {
-                            Text(stringResource(R.string.export_date_span, it.start.format(FULL_DATE), it.endInclusive.format(FULL_DATE)), fontWeight = FontWeight.Bold)
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            BackBar(stringResource(R.string.export_title), onBack)
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                AppCard(Modifier.padding(horizontal = 20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Icon(Icons.Outlined.PictureAsPdf, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
+                        Column {
+                            state.range?.let {
+                                Text(stringResource(R.string.export_date_span, it.start.format(FULL_DATE), it.endInclusive.format(FULL_DATE)), fontWeight = FontWeight.Bold)
+                            }
+                            Text(
+                                stringResource(
+                                    R.string.export_count_and_pages,
+                                    pluralStringResource(R.plurals.export_txn_count, state.includedCount, state.includedCount),
+                                    pluralStringResource(R.plurals.export_pages, pages, pages),
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
-                        Text(
-                            stringResource(
-                                R.string.export_count_and_pages,
-                                pluralStringResource(R.plurals.export_txn_count, state.includedCount, state.includedCount),
-                                pluralStringResource(R.plurals.export_pages, pages, pages),
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                    }
+                }
+                Spacer(Modifier.height(22.dp))
+                SectionLabel(stringResource(R.string.export_date_range), Modifier.padding(horizontal = 20.dp))
+                Spacer(Modifier.height(8.dp))
+                RangeChips(state.preset, state.customRange, vm::selectPreset, vm::selectCustom, PaddingValues(horizontal = 20.dp))
+                Spacer(Modifier.height(20.dp))
+                SectionLabel(stringResource(R.string.export_include), Modifier.padding(horizontal = 20.dp))
+                Spacer(Modifier.height(6.dp))
+                AppCard(Modifier.padding(horizontal = 20.dp), padding = 0.dp) {
+                    Column(Modifier.padding(horizontal = 16.dp)) {
+                        val o = state.options
+                        OptionRow(stringResource(R.string.export_opt_summary), o.summary) { vm.setOptions(o.copy(summary = it)) }
+                        OptionRow(stringResource(R.string.export_opt_chart), o.categoryChart) { vm.setOptions(o.copy(categoryChart = it)) }
+                        OptionRow(stringResource(R.string.export_opt_list), o.transactionList) { vm.setOptions(o.copy(transactionList = it)) }
+                        OptionRow(stringResource(R.string.export_opt_income), o.includeIncome, last = true) { vm.setOptions(o.copy(includeIncome = it)) }
                     }
                 }
             }
-            Spacer(Modifier.height(22.dp))
-            SectionLabel(stringResource(R.string.export_date_range), Modifier.padding(horizontal = 20.dp))
-            Spacer(Modifier.height(8.dp))
-            RangeChips(state.preset, state.customRange, vm::selectPreset, vm::selectCustom, PaddingValues(horizontal = 20.dp))
-            Spacer(Modifier.height(20.dp))
-            SectionLabel(stringResource(R.string.export_include), Modifier.padding(horizontal = 20.dp))
-            Spacer(Modifier.height(6.dp))
-            AppCard(Modifier.padding(horizontal = 20.dp), padding = 0.dp) {
-                Column(Modifier.padding(horizontal = 16.dp)) {
-                    val o = state.options
-                    OptionRow(stringResource(R.string.export_opt_summary), o.summary) { vm.setOptions(o.copy(summary = it)) }
-                    OptionRow(stringResource(R.string.export_opt_chart), o.categoryChart) { vm.setOptions(o.copy(categoryChart = it)) }
-                    OptionRow(stringResource(R.string.export_opt_list), o.transactionList) { vm.setOptions(o.copy(transactionList = it)) }
-                    OptionRow(stringResource(R.string.export_opt_income), o.includeIncome, last = true) { vm.setOptions(o.copy(includeIncome = it)) }
+            Column(Modifier.padding(20.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
+                    Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(R.string.export_privacy_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedButton(
+                        onClick = { saveLauncher.launch(vm.fileName()) },
+                        enabled = state.range != null,
+                        modifier = Modifier.weight(1f).height(PrimaryButtonHeight),
+                        shape = MaterialTheme.shapes.extraLarge,
+                    ) { Text(stringResource(R.string.export_save), fontWeight = FontWeight.Bold) }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val uri = vm.shareUri(context) ?: return@launch
+                                val send = Intent(Intent.ACTION_SEND).apply {
+                                    type = "application/pdf"
+                                    putExtra(Intent.EXTRA_STREAM, uri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(Intent.createChooser(send, shareChooserTitle))
+                            }
+                        },
+                        enabled = state.range != null,
+                        modifier = Modifier.weight(1f).height(PrimaryButtonHeight),
+                        shape = MaterialTheme.shapes.extraLarge,
+                    ) { Text(stringResource(R.string.export_share), fontWeight = FontWeight.Bold) }
                 }
             }
         }
-        Column(Modifier.padding(20.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
-                Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    stringResource(R.string.export_privacy_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(14.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(
-                    onClick = { saveLauncher.launch(vm.fileName()) },
-                    enabled = state.range != null,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
-                ) { Text(stringResource(R.string.export_save), fontWeight = FontWeight.Bold) }
-                Button(
-                    onClick = {
-                        scope.launch {
-                            val uri = vm.shareUri(context) ?: return@launch
-                            val send = Intent(Intent.ACTION_SEND).apply {
-                                type = "application/pdf"
-                                putExtra(Intent.EXTRA_STREAM, uri)
-                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            }
-                            context.startActivity(Intent.createChooser(send, shareChooserTitle))
-                        }
-                    },
-                    enabled = state.range != null,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
-                ) { Text(stringResource(R.string.export_share), fontWeight = FontWeight.Bold) }
-            }
-        }
-        SnackbarHost(snackbar)
+        // Overlaid, not a sibling in the Column: as a child it took vertical space, shrinking the
+        // scroll region and jolting the page at the moment the confirmation appeared.
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
     }
 }
 

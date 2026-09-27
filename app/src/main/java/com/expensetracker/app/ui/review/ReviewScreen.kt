@@ -50,10 +50,12 @@ import com.expensetracker.app.data.Status
 import com.expensetracker.app.data.TransactionEntity
 import com.expensetracker.app.data.accountLabel
 import com.expensetracker.app.data.categoryEnum
+import com.expensetracker.app.ui.components.BackBar
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.SectionLabel
 import com.expensetracker.app.ui.components.formatDateTime
+import com.expensetracker.app.ui.theme.PrimaryButtonHeight
 import com.expensetracker.core.format.Money
 import com.expensetracker.core.model.TransactionType
 import kotlinx.coroutines.flow.SharingStarted
@@ -76,33 +78,33 @@ fun ReviewScreen(container: AppContainer, onBack: () -> Unit, onEdit: (Long) -> 
     val list = items.orEmpty()
     val current = list.firstOrNull()
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(56.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back)) }
-            Text(
-                stringResource(R.string.review_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f).semantics { heading() },
-            )
+    Column(Modifier.fillMaxSize()) {
+        BackBar(stringResource(R.string.review_title), onBack) {
             if (list.isNotEmpty()) {
-                Text(pluralStringResource(R.plurals.review_left, list.size, list.size), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    pluralStringResource(R.plurals.review_left, list.size, list.size),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 12.dp),
+                )
             }
         }
-
-        if (items == null) {
-            // Still loading; show nothing rather than a misleading "all caught up".
-        } else if (current == null) {
-            AllCaughtUp()
-        } else {
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                Spacer(Modifier.height(8.dp))
-                ReviewCard(current)
+        // The bar sits outside this gutter so its arrow lines up with the other back bars.
+        Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+            if (items == null) {
+                // Still loading; show nothing rather than a misleading "all caught up".
+            } else if (current == null) {
+                AllCaughtUp()
+            } else {
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                    Spacer(Modifier.height(8.dp))
+                    ReviewCard(current)
+                }
+                ReviewActions(
+                    onIgnore = { vm.ignore(current) },
+                    onEdit = { onEdit(current.id) },
+                    onConfirm = { vm.confirm(current) },
+                )
             }
-            ReviewActions(
-                onIgnore = { vm.ignore(current) },
-                onEdit = { onEdit(current.id) },
-                onConfirm = { vm.confirm(current) },
-            )
         }
     }
 }
@@ -124,17 +126,17 @@ private fun AllCaughtUp() {
 @Composable
 private fun ReviewActions(onIgnore: () -> Unit, onEdit: () -> Unit, onConfirm: () -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(vertical = 16.dp)) {
-        OutlinedButton(onClick = onIgnore, modifier = Modifier.weight(1f).height(56.dp), shape = RoundedCornerShape(18.dp)) {
+        OutlinedButton(onClick = onIgnore, modifier = Modifier.weight(1f).height(PrimaryButtonHeight), shape = MaterialTheme.shapes.extraLarge) {
             Icon(Icons.Outlined.Close, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.size(4.dp))
             Text(stringResource(R.string.review_ignore))
         }
-        OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(56.dp), shape = RoundedCornerShape(18.dp)) {
+        OutlinedButton(onClick = onEdit, modifier = Modifier.weight(1f).height(PrimaryButtonHeight), shape = MaterialTheme.shapes.extraLarge) {
             Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.size(4.dp))
             Text(stringResource(R.string.review_edit))
         }
-        Button(onClick = onConfirm, modifier = Modifier.weight(1.2f).height(56.dp), shape = RoundedCornerShape(18.dp)) {
+        Button(onClick = onConfirm, modifier = Modifier.weight(1.2f).height(PrimaryButtonHeight), shape = MaterialTheme.shapes.extraLarge) {
             Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.size(4.dp))
             Text(stringResource(R.string.review_looks_right), fontWeight = FontWeight.Bold)

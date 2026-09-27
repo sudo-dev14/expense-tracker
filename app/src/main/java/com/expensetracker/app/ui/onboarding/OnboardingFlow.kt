@@ -68,6 +68,7 @@ import com.expensetracker.app.ui.components.FULL_DATE
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.app.ui.components.SectionLabel
 import com.expensetracker.app.ui.components.toLocalDate
+import com.expensetracker.app.ui.theme.PrimaryButtonHeight
 import com.expensetracker.core.format.Money
 import com.expensetracker.core.model.TransactionType
 import java.text.NumberFormat
@@ -144,8 +145,8 @@ private fun OnboardingPage(
 private fun PrimaryButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-        shape = RoundedCornerShape(28.dp),
+        modifier = Modifier.fillMaxWidth().height(PrimaryButtonHeight),
+        shape = MaterialTheme.shapes.extraLarge,
     ) { Text(text, fontWeight = FontWeight.Bold, fontSize = 16.sp) }
 }
 
@@ -161,7 +162,7 @@ private fun PrivacyPromise(onContinue: () -> Unit) {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(88.dp)
-                .clip(RoundedCornerShape(28.dp))
+                .clip(MaterialTheme.shapes.extraLarge)
                 .background(MaterialTheme.colorScheme.primaryContainer),
         ) {
             Icon(Icons.Outlined.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(40.dp))
@@ -281,8 +282,8 @@ private fun ImportProgress(container: AppContainer, onContinue: () -> Unit) {
             } else {
                 OutlinedButton(
                     onClick = onContinue,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
+                    modifier = Modifier.fillMaxWidth().height(PrimaryButtonHeight),
+                    shape = MaterialTheme.shapes.extraLarge,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 ) { Text(stringResource(R.string.onb_import_continue_background), fontWeight = FontWeight.Bold) }
             }

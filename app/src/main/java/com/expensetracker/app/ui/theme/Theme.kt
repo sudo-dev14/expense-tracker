@@ -2,6 +2,8 @@ package com.expensetracker.app.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -10,11 +12,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.expensetracker.app.data.ThemeMode
 
 // Calm palette from the wireframes: deep teal for primary actions, amber for "needs attention".
-private val Light = lightColorScheme(
+/**
+ * Exposed because the PDF exporter draws on paper and therefore always uses the light palette.
+ * It previously kept its own copy of these four values, which could drift silently.
+ */
+internal val LightScheme = lightColorScheme(
     primary = Color(0xFF0E5A52),
     onPrimary = Color.White,
     primaryContainer = Color(0xFFE1EEEB),
@@ -35,7 +42,9 @@ private val Light = lightColorScheme(
     onSurfaceVariant = Color(0xFF5B6060),
     surfaceContainerLow = Color(0xFFFFFFFF),
     surfaceContainer = Color(0xFFFFFFFF),
-    surfaceContainerHigh = Color(0xFFFFFFFF),
+    // Just off the card white, so DropdownMenu/DatePickerDialog/AlertDialog have an
+    // edge. The flat surfaceContainer* scheme is deliberate; this is the one exception.
+    surfaceContainerHigh = Color(0xFFFBFAF6),
     outline = Color(0xFFD6D3CA),
     outlineVariant = Color(0xFFE3E1D9),
     inverseSurface = Color(0xFF17191A),
@@ -44,7 +53,7 @@ private val Light = lightColorScheme(
     error = Color(0xFFB3261E),
 )
 
-private val Dark = darkColorScheme(
+private val DarkScheme = darkColorScheme(
     primary = Color(0xFF7FCBBC),
     onPrimary = Color(0xFF00382F),
     primaryContainer = Color(0xFF1D4A43),
@@ -91,6 +100,22 @@ private val AppTypography = Typography().run {
 val AmountStyle = TextStyle(fontFamily = DisplayFamily, fontWeight = FontWeight.SemiBold)
 
 /**
+ * The corner scale. Cards and the FAB are [large]; buttons are [extraLarge], which at the button
+ * heights below is a full pill. Chips keep their own 18dp radius at the call site: they are a
+ * different family of control and tracking the button scale would make them look like buttons.
+ */
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
+    extraLarge = RoundedCornerShape(28.dp),
+)
+
+/** Full-width commit actions at the foot of a screen or sheet: Continue, Save, Add, Share. */
+val PrimaryButtonHeight = 56.dp
+
+/**
  * Whether this mode paints dark. Public because the window itself has to agree with Compose:
  * the status-bar icons and the window background live outside the composition, and if they
  * follow the system night setting instead of this preference they contradict the app's colours.
@@ -105,5 +130,10 @@ fun ThemeMode.isDarkTheme(): Boolean = when (this) {
 @Composable
 fun ExpenseTheme(mode: ThemeMode, content: @Composable () -> Unit) {
     val dark = mode.isDarkTheme()
-    MaterialTheme(colorScheme = if (dark) Dark else Light, typography = AppTypography, content = content)
+    MaterialTheme(
+        colorScheme = if (dark) DarkScheme else LightScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
+        content = content,
+    )
 }

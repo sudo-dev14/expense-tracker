@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.expensetracker.app.AppContainer
 import com.expensetracker.app.R
 import com.expensetracker.app.ui.displayName
+import com.expensetracker.app.ui.components.BackBar
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.core.model.Category
 import kotlinx.coroutines.launch
@@ -41,14 +42,7 @@ fun RulesScreen(container: AppContainer, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     Column(Modifier.fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(56.dp).padding(horizontal = 8.dp)) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back)) }
-            Text(
-                stringResource(R.string.rules_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { heading() },
-            )
-        }
+        BackBar(stringResource(R.string.rules_title), onBack)
         Text(
             stringResource(R.string.rules_explainer),
             style = MaterialTheme.typography.bodyMedium,

@@ -80,6 +80,7 @@ import com.expensetracker.app.ui.NEW_TRANSACTION
 import com.expensetracker.app.ui.displayName
 import com.expensetracker.app.ui.components.MerchantAvatar
 import com.expensetracker.app.ui.components.formatDateTime
+import com.expensetracker.app.ui.theme.PrimaryButtonHeight
 import com.expensetracker.core.model.Category
 import com.expensetracker.core.model.TransactionType
 import com.expensetracker.core.parser.Extractors
@@ -385,20 +386,20 @@ fun EditTransactionSheet(container: AppContainer, transactionId: Long, onDismiss
                     original == null -> {}
                     original.source == Source.MANUAL -> OutlinedButton(
                         onClick = { vm.delete(dismiss) },
-                        modifier = Modifier.weight(1f).height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
+                        modifier = Modifier.weight(1f).height(PrimaryButtonHeight),
+                        shape = MaterialTheme.shapes.extraLarge,
                     ) { Text(stringResource(R.string.action_delete)) }
                     else -> OutlinedButton(
                         onClick = { vm.markNotExpense(dismiss) },
-                        modifier = Modifier.weight(1f).height(52.dp),
-                        shape = RoundedCornerShape(26.dp),
+                        modifier = Modifier.weight(1f).height(PrimaryButtonHeight),
+                        shape = MaterialTheme.shapes.extraLarge,
                     ) { Text(stringResource(R.string.txn_not_expense)) }
                 }
                 Button(
                     onClick = { vm.save(dismiss) },
                     enabled = state.amountMinor != null && !dismissing,
-                    modifier = Modifier.weight(1f).height(52.dp),
-                    shape = RoundedCornerShape(26.dp),
+                    modifier = Modifier.weight(1f).height(PrimaryButtonHeight),
+                    shape = MaterialTheme.shapes.extraLarge,
                 ) { Text(stringResource(if (state.isNew) R.string.edit_add else R.string.action_save), fontWeight = FontWeight.Bold) }
             }
             Spacer(Modifier.height(16.dp))

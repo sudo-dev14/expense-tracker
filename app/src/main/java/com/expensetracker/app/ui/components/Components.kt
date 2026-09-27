@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,13 +21,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DateRangePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -126,6 +131,47 @@ fun OfflineBadge(onClick: (() -> Unit)? = null) {
     }
 }
 
+/**
+ * The add-expense FAB. Both tab screens show the same one; they had drifted into two identical
+ * copies, which is two places to change and two places to forget.
+ */
+@Composable
+fun AddExpenseFab(onClick: () -> Unit, contentDescription: String, modifier: Modifier = Modifier) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        shape = MaterialTheme.shapes.large,
+        modifier = modifier.padding(20.dp),
+    ) { Icon(Icons.Outlined.Add, contentDescription = contentDescription) }
+}
+
+/**
+ * The back arrow and title above a pushed screen.
+ *
+ * The 8dp inset is what lines the arrow up with the 20dp content gutter below it: an IconButton is
+ * 48dp around a 24dp icon, so the glyph starts 12dp inside its own bounds. Review, Export and
+ * Rules each had their own copy of this row and Review used 20dp, which pushed its arrow 12dp
+ * right of the other two — visible when moving between them.
+ */
+@Composable
+fun BackBar(title: String, onBack: () -> Unit, trailing: @Composable RowScope.() -> Unit = {}) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 8.dp),
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.action_back))
+        }
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
+        trailing()
+    }
+}
+
 @Composable
 fun ScreenHeader(title: String, onBadgeClick: (() -> Unit)? = null) {
     Row(
@@ -165,9 +211,9 @@ fun AppCard(modifier: Modifier = Modifier, padding: Dp = 18.dp, content: @Compos
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(MaterialTheme.shapes.large)
             .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(20.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
             .padding(padding),
     ) { content() }
 }

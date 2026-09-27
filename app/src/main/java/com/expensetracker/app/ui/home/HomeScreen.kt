@@ -1,6 +1,7 @@
 package com.expensetracker.app.ui.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.expensetracker.app.AppContainer
 import com.expensetracker.app.R
 import com.expensetracker.app.ui.displayName
+import com.expensetracker.app.ui.components.AddExpenseFab
 import com.expensetracker.app.ui.components.AppCard
 import com.expensetracker.app.ui.components.DonutChart
 import com.expensetracker.app.ui.components.DonutSlice
@@ -125,13 +127,11 @@ fun HomeScreen(
             }
             item { Spacer(Modifier.height(96.dp)) }
         }
-        FloatingActionButton(
+        AddExpenseFab(
             onClick = onAddExpense,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-        ) { Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.home_add_expense)) }
+            contentDescription = stringResource(R.string.home_add_expense),
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 }
 
@@ -160,6 +160,9 @@ private fun SummaryCard(state: HomeUiState) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(MaterialTheme.colorScheme.primaryContainer)
+            // The tint alone is about 1.1:1 against the page in light mode, so the app's most
+            // important number sits on a barely-there slab. The border is what makes it an object.
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(24.dp))
             .padding(22.dp),
     ) {
         // Sage teal card: dark text for the amount, teal-tinted labels, darker amber for "up"
